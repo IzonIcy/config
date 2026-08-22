@@ -1,0 +1,248 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/x-preview-f-free",
+  "shell": "zsh",
+  "snapshot": true,
+  "autoupdate": "notify",
+  "lsp": true,
+  "plugin": [
+    "ecc-universal@2.1.0"
+  ],
+  "instructions": [
+    "AGENTS.md"
+  ],
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "bash": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "external_directory": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "lsp": "allow",
+    "skill": "allow",
+    "doom_loop": "allow"
+  },
+  "default_agent": "build",
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "prompt": "You are a smart coding agent with a specific personality. You communicate like Theo (t3.gg) — a developer who's direct, pragmatic, occasionally sarcastic, and doesn't sugarcoat things.\n\n**Your communication style:**\n- Be direct and honest. If something is a bad idea, say so. If something is great, say that too.\n- Use casual language. \"Yeah that's jank\", \"this is clean af\", \"okay real talk\", \"lmao no\", \"ugh why would you do that\", \"this fkn rules\", \"simple is good\".\n- Self-deprecating humor fits. You're a \"TypeScript sympathizer\" not an enthusiast.\n- Avoid corporate speak. No \"leverage\", \"synergize\", \"circle back\". Say what you mean.\n- Be concise. Don't write essays. Get to the point.\n- Use emoji sparingly and intentionally. 🫡 for mission complete. 🤷 for \"idk\". 🔥 for something cool.\n\n**Your coding philosophy (Theo-style):**\n- Fight complexity aggressively. \"Do not preserve complexity just because it already exists.\"\n- \"Software that feels obvious\" — the best solutions feel almost boring.\n- TypeScript everywhere. Type safety is not optional.\n- Performance matters. Bloat is unacceptable.\n- Open source by default. \"Still free, still open source.\"\n- YAGNI — you ain't gonna need it. Don't build for the future, build for now.\n- Small PRs, one concern per change.\n\nOperational rules — subagent delegation, tool usage, testing discipline, language-specific commands — live in AGENTS.md. Follow them.",
+      "options": {}
+    }
+  },
+  "command": {
+    "review": {
+      "description": "Review the current changes or a specific file",
+      "agent": "review",
+      "template": "Review the following code changes for quality, security, and correctness:\n\n$ARGUMENTS"
+    },
+    "test": {
+      "description": "Write tests for the current changes",
+      "agent": "test",
+      "template": "Write comprehensive tests for:\n\n$ARGUMENTS"
+    },
+    "debug": {
+      "description": "Investigate and fix a bug",
+      "agent": "debug",
+      "template": "Debug the following issue:\n\n$ARGUMENTS"
+    },
+    "refactor": {
+      "description": "Refactor code for better structure",
+      "agent": "refactor",
+      "template": "Refactor the following code, keeping behavior identical:\n\n$ARGUMENTS"
+    },
+    "explain": {
+      "description": "Explain code in detail",
+      "agent": "explain",
+      "template": "Explain the following code in detail:\n\n$ARGUMENTS"
+    },
+    "docs": {
+      "description": "Generate documentation",
+      "agent": "docs",
+      "template": "Write documentation for:\n\n$ARGUMENTS"
+    },
+    "commit": {
+      "description": "Write a commit message for staged changes",
+      "agent": "commit",
+      "template": "Write a commit message for the currently staged changes."
+    },
+    "fix": {
+      "description": "Auto-fix lint and style issues",
+      "agent": "fix",
+      "template": "Fix the following issues:\n\n$ARGUMENTS"
+    },
+    "plan": {
+      "description": "Plan architecture or implementation",
+      "agent": "plan",
+      "template": "Create a plan for:\n\n$ARGUMENTS"
+    },
+    "explain-architecture": {
+      "description": "Explain the architecture of the current project or a specific area",
+      "agent": "plan",
+      "template": "Explain the architecture of the following area, including component tree, data flow, and key design decisions:\n\n$ARGUMENTS"
+    },
+    "review-security": {
+      "description": "Review code specifically for security issues",
+      "agent": "review",
+      "template": "Review the following code with a SECURITY focus. Check for: injection, XSS, secrets exposure, authentication flaws, authorization bypass, unsafe deserialization, and dependency vulnerabilities:\n\n$ARGUMENTS"
+    },
+    "status": {
+      "description": "Show current git status and recent changes",
+      "agent": "build",
+      "template": "Run `git status` and `git log --oneline -10` and summarize the current state of the repository."
+    },
+    "bootstrap": {
+      "description": "Create or update a project-level AGENTS.md for the current project",
+      "agent": "plan",
+      "template": "Create a project-level AGENTS.md file at the root of this project. First, explore the project to understand its tech stack, structure, commands, and conventions. Then write an AGENTS.md that includes:\n1. Project description and purpose\n2. Build, test, lint, and type-check commands\n3. Project structure overview (key directories)\n4. Code conventions used in this project\n5. Architecture notes\n6. Common gotchas\n7. Testing patterns\n\nBase this on real exploration of the codebase, not assumptions."
+    }
+  },
+  "formatter": {
+    "prettier": {
+      "command": [
+        "prettier",
+        "--stdin-filepath",
+        "{file}",
+        "--write"
+      ],
+      "extensions": [
+        ".css",
+        ".scss",
+        ".md"
+      ]
+    },
+    "rustfmt": {
+      "command": [
+        "rustfmt"
+      ],
+      "extensions": [
+        ".rs"
+      ]
+    },
+    "gofmt": {
+      "command": [
+        "gofmt"
+      ],
+      "extensions": [
+        ".go"
+      ]
+    },
+    "ruff": {
+      "command": [
+        "ruff",
+        "format",
+        "--stdin-filename",
+        "{file}",
+        "--quiet"
+      ],
+      "extensions": [
+        ".py"
+      ]
+    },
+    "shfmt": {
+      "command": [
+        "shfmt"
+      ],
+      "extensions": [
+        ".sh",
+        ".bash"
+      ]
+    },
+    "biome": {
+      "command": [
+        "bunx",
+        "biome",
+        "format",
+        "--stdin-file-path",
+        "{file}"
+      ],
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+        ".mts",
+        ".cts",
+        ".json"
+      ]
+    }
+  },
+  "compaction": {
+    "auto": true,
+    "tail_turns": 20,
+    "reserved": 16000
+  },
+  "mcp": {
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp",
+        "--executable-path",
+        "/Applications/Helium.app/Contents/MacOS/Helium"
+      ],
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "enabled": true,
+      "environment": {
+        "MEMORY_FILE_PATH": "/Users/ryanbahadori/.config/opencode/memory.jsonl"
+      }
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": true
+    },
+    "gh_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app",
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "git": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@cyanheads/git-mcp-server"
+      ],
+      "enabled": true,
+      "environment": {}
+    }
+  },
+  "experimental": {
+    "mcp_timeout": 60000
+  }
+}

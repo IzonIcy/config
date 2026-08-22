@@ -1,0 +1,49 @@
+# Rich Vesper Theme for btop
+# Based on zezic/rich-vesper-zed color palette
+
+theme[main_bg]="#101010"
+theme[main_fg]="#ffffff"
+
+theme[title]="#FFC799"
+theme[hi_fg]="#99FFE4"
+theme[selected_bg]="#232323"
+theme[selected_fg]="#ffffff"
+
+theme[inactive_fg]="#A0A0A0"
+theme[inactive_bg]="#161616"
+
+theme[proc]="#FFDEC4"
+theme[process]="#ffffff"
+theme[core]="#FFC799"
+theme[temp]="#f5a191"
+
+theme[chart]="#FFC799"
+theme[graph]="#FFC799"
+
+theme[div_line]="#202020"
+
+# Memory colors
+theme[mem_used]="#e6b99d"
+theme[mem_cached]="#99FFE4"
+theme[mem_free]="#101010"
+theme[mem_available]="#90b99f"
+
+# Swap colors
+theme[swap_used]="#ea83a5"
+theme[swap_free]="#101010"
+
+# Network colors
+theme[net_download]="#99FFE4"
+theme[net_upload]="#FFC799"
+
+# Process colors
+theme[process_cpu]="#FFC799"
+theme[process_mem]="#99FFE4"
+
+# GPU colors
+theme[gpu]="#aca1cf"
+
+# Battery colors
+theme[battery_high]="#99FFE4"
+theme[battery_medium]="#e6b99d"
+theme[battery_low]="#f5a191"

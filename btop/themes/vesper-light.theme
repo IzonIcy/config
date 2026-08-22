@@ -1,0 +1,49 @@
+# Vesper Light Theme for btop
+# Light counterpart of the Rich Vesper theme, matches VesperLight terminal theme
+
+theme[main_bg]="#FFFFFF"
+theme[main_fg]="#121212"
+
+theme[title]="#B8772A"
+theme[hi_fg]="#12803D"
+theme[selected_bg]="#E0E0E0"
+theme[selected_fg]="#121212"
+
+theme[inactive_fg]="#5F5F5F"
+theme[inactive_bg]="#F0F0F0"
+
+theme[proc]="#C07A3E"
+theme[process]="#121212"
+theme[core]="#B8772A"
+theme[temp]="#B8433F"
+
+theme[chart]="#B8772A"
+theme[graph]="#B8772A"
+
+theme[div_line]="#D0D0D0"
+
+# Memory colors
+theme[mem_used]="#B88A2E"
+theme[mem_cached]="#12803D"
+theme[mem_free]="#121212"
+theme[mem_available]="#3E8F5F"
+
+# Swap colors
+theme[swap_used]="#B8433F"
+theme[swap_free]="#121212"
+
+# Network colors
+theme[net_download]="#12803D"
+theme[net_upload]="#B8772A"
+
+# Process colors
+theme[process_cpu]="#B8772A"
+theme[process_mem]="#12803D"
+
+# GPU colors
+theme[gpu]="#6C5FA8"
+
+# Battery colors
+theme[battery_high]="#12803D"
+theme[battery_medium]="#B88A2E"
+theme[battery_low]="#B8433F"

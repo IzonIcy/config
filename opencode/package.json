@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.17.13",
+    "ecc-universal": "^2.0.0"
+  }
+}

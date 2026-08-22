@@ -1,0 +1,54 @@
+# Theme (bundled theme - exact filename so it resolves in any launch env)
+theme = Catppuccin Mocha
+
+# Transparency
+background-opacity = 0.75
+background-blur-radius = 25
+
+# Font
+font-family = JetBrainsMonoNL Nerd Font Mono
+font-size = 14
+font-feature = -calt
+
+# Cursor
+cursor-style = bar
+cursor-style-blink = false
+
+# Splits
+unfocused-split-opacity = 0.55
+split-divider-color = #585b70
+
+# macOS
+macos-titlebar-style = tabs
+macos-option-as-alt = true
+
+# Window
+mouse-hide-while-typing = true
+confirm-close-surface = false
+window-decoration = none
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+
+# Updates
+auto-update = check
+auto-update-channel = stable
+
+# Shell integration
+shell-integration-features = no-cursor,sudo
+copy-on-select = clipboard
+
+
+
+# Shaders (optional)
+# custom-shader = shaders/bettercrt.glsl
+# custom-shader = shaders/retro-terminal.glsl
+
+# Keybindings
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+0=reset_font_size
+keybind = cmd+shift+[=previous_tab
+keybind = cmd+shift+]=next_tab

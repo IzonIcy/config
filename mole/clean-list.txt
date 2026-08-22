@@ -1,0 +1,80 @@
+# Mole Cleanup Preview - 2026-08-06 17:48:30
+#
+# How to protect files:
+# 1. Copy any path below to ~/.config/mole/whitelist
+# 2. Run: mo clean --whitelist
+#
+# Example:
+#   /Users/*/Library/Caches/com.example.app
+#
+
+
+=== User essentials ===
+/Users/ryanbahadori/Library/Caches/Homebrew  # 39.7MB
+/Users/ryanbahadori/Library/Caches/node-gyp  # 69.7MB
+/Users/ryanbahadori/Library/Caches/GeoServices  # 8KB
+/Users/ryanbahadori/Library/Caches/net.imput.helium  # 2.0MB
+
+=== App caches ===
+/Users/ryanbahadori/Library/Suggestions/Metrics  # 0B
+/Users/ryanbahadori/Library/Suggestions/journals  # 0B
+/Users/ryanbahadori/Library/Suggestions/Harvesting  # 512KB
+/Users/ryanbahadori/Library/Suggestions/entities.db  # 12KB
+/Users/ryanbahadori/Library/Suggestions/snippets.db  # 12KB
+/Users/ryanbahadori/Library/Suggestions/training.db  # 8KB
+/Users/ryanbahadori/Library/Suggestions/entities.db-shm  # 33KB
+/Users/ryanbahadori/Library/Suggestions/entities.db-wal  # 503KB
+/Users/ryanbahadori/Library/Suggestions/snippets.db-shm  # 33KB
+/Users/ryanbahadori/Library/Suggestions/snippets.db-wal  # 58KB
+/Users/ryanbahadori/Library/Suggestions/training.db-shm  # 33KB
+/Users/ryanbahadori/Library/Suggestions/training.db-wal  # 67KB
+/Users/ryanbahadori/Library/Suggestions/email-to-name.kvcache  # 0B
+/Users/ryanbahadori/Library/Suggestions/phone-to-name.kvcache  # 0B
+/Users/ryanbahadori/Library/Suggestions/suggestions-device-day-group  # 1KB
+/Users/ryanbahadori/Library/Suggestions/significant-pseudo-contacts.bf.bf2-head  # 50KB
+/Users/ryanbahadori/Library/Suggestions/significant-pseudo-contacts.bf.bf2-tail  # 50KB
+/Users/ryanbahadori/Library/Containers/com.apple.geod/Data/tmp/TemporaryItems  # 0B
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/Cache.db  # 688KB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/Generated  # 13.5MB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/HSTS.plist  # 1KB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/Cache.db-shm  # 33KB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/Cache.db-wal  # 2.2MB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/fsCachedData  # 14.5MB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/HelpCache.plist  # 33KB
+/Users/ryanbahadori/Library/Caches/com.apple.helpd/CSHelpIndex.plist  # 26KB
+/Users/ryanbahadori/Library/Caches/com.apple.parsecd/Cohorts  # 82KB
+
+=== Browsers ===
+/Users/ryanbahadori/Library/Caches/com.apple.Safari/WebKitCache  # 0B
+/Users/ryanbahadori/Library/Caches/net.imput.helium/Default  # 2.0MB
+
+=== Developer tools ===
+/Users/ryanbahadori/.npm/_cacache/tmp  # 0B
+/Users/ryanbahadori/.npm/_cacache/index-v5  # 1.6MB
+/Users/ryanbahadori/.npm/_cacache/content-v2  # 107.5MB
+/Users/ryanbahadori/.npm/_npx/15b07286cbcc3329  # 25.2MB
+/Users/ryanbahadori/.npm/_npx/3623a4089eda7598  # 38.2MB
+/Users/ryanbahadori/.npm/_npx/3dfbf5a9eea4a1b3  # 22.6MB
+/Users/ryanbahadori/.npm/_npx/86170c4cd1c5da32  # 20.2MB
+/Users/ryanbahadori/.npm/_npx/de2bd410102f5eda  # 26.4MB
+/Users/ryanbahadori/.npm/_npx/de690aabc5f6b399  # 11.0MB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_46_59_903Z-debug-0.log  # 1KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_291Z-debug-0.log  # 82KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_292Z-debug-0.log  # 2KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_299Z-debug-0.log  # 73KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_302Z-debug-0.log  # 41KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_306Z-debug-0.log  # 80KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_307Z-debug-0.log  # 6KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_47_01_372Z-debug-0.log  # 30KB
+/Users/ryanbahadori/.npm/_logs/2026-08-07T00_48_09_437Z-debug-0.log  # 1KB
+/Users/ryanbahadori/.npm/_prebuilds/0caca1-better-sqlite3-v12.11.1-node-v147-darwin-arm64.tar.gz  # 979KB
+/Users/ryanbahadori/.cache/opencode/bin  # 0B
+/Users/ryanbahadori/.cache/opencode/packages  # 88.8MB
+/Users/ryanbahadori/.cache/opencode/models.json  # 3.6MB
+
+# ============================================
+# Summary
+# ============================================
+# Potential cleanup: 492.0MB
+# Items: 55
+# Categories: 4

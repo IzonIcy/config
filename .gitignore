@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# Databases / app-generated state
+*.db
+*.db-shm
+*.db-wal
+*.sqlite*
+configstore/
+
+# Secrets / machine-local auth
+gh/hosts.yml
+fish/fish_variables
+
+# Personal agent memory
+opencode/memory.jsonl
+
+# Own git repo, versions itself
+nvim/
+
+# Logs & app session state
+*.log
+herdr/session.json
+
+# Spicetify downloaded artifacts (marketplace installs)
+spicetify/CustomApps/marketplace*
+
+# Node
+node_modules/
+
+# Raycast (extensions/ is a 600MB+ installed-extension cache)
+raycast/extensions/
+raycast/ai/
+# config.json contains a live API token — never commit it
+raycast/config.json
+
+# Editor backups
+*.bak

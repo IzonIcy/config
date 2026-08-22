@@ -1,0 +1,79 @@
+[core]
+	excludesfile = ~/.gitignore_global
+	editor = nvim
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	syntax-theme = "Catppuccin Mocha"
+	side-by-side = true
+	line-numbers = true
+
+[init]
+	defaultBranch = main
+
+[push]
+	default = current
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+
+[alias]
+	s = status -s
+	l = log --oneline --graph --all
+	a = add .
+	c = commit -m
+	co = checkout
+	b = branch
+	d = diff
+	ds = diff --staged
+	undo = reset HEAD~1 --mixed
+	amend = commit --amend --no-edit
+	lg = log --oneline --graph --all --decorate
+	last = log -1 HEAD
+	who = shortlog -s --
+	unstage = restore --staged .
+	discard = restore .
+	fetchp = fetch --prune --all
+	cleanup = !git fetch --prune --all && git branch --merged | grep -v \"\\*\" | xargs -r git branch -d
+	hist = log --graph --pretty=format:'%C(auto)%h %C(blue)%ad%C(reset) %s %C(cyan)(%an)%C(reset)%C(auto)%d' --date=short
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[user]
+	signingkey = 36950F0667E43114517E2039136C6A545BF6B491
+	name = Anaya
+	email = ryanbahadori74@gmail.com
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+
+[color]
+	ui = true
+
+[color "branch"]
+	current = #a6e3a1 bold
+	local = #89b4fa
+	remote = #cba6f7
+
+[color "diff"]
+	meta = #f9e2af bold
+	frag = #cba6f7 bold
+	old = #f38ba8 bold
+	new = #a6e3a1 bold
+	commit = #f9e2af
+
+[color "status"]
+	added = #a6e3a1
+	changed = #f9e2af
+	untracked = #f38ba8
