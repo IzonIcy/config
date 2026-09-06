@@ -1,5 +1,5 @@
 if status is-interactive
-# Commands to run in interactive sessions can go here
+    set -g __fish_startup_start (date +%s%N | cut -c1-13)
 end
 
 # Added by LM Studio CLI (lms)
@@ -55,4 +55,17 @@ abbr -a dc 'docker compose'
 # Fastfetch on shell start
 function fish_greeting
     fastfetch
+end
+
+# Startup timer
+if set -q __fish_startup_start
+    set -l now (date +%s%N | cut -c1-13)
+    set -l elapsed (math $now - $__fish_startup_start)
+    if test $elapsed -gt 100
+        set_color yellow
+    else
+        set_color green
+    end
+    echo "fish startup: $elapsed ms"
+    set_color normal
 end
