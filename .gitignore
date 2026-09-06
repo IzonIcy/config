@@ -36,3 +36,19 @@ raycast/config.json
 
 # Editor backups
 *.bak
+
+# Generated fish completions
+fish/completions/
+
+# Self-referential symlinks from bootstrap
+fish/fish/
+ghostty/ghostty/
+git/git/
+mise/mise/
+starship/starship/
+
+# Prisma generated
+prisma/
+
+# Opencode skills (installed separately)
+opencode/skill/
