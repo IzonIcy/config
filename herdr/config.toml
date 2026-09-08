@@ -200,6 +200,7 @@ show_agent_labels_on_pane_borders = true
 # accent = "cyan"
 
 # Background notification popup delivery
+status_indicators = "symbols"
 [ui.toast]
 # off = disable pop-up notifications
 # herdr = show top-right in-app toasts
@@ -208,6 +209,7 @@ show_agent_labels_on_pane_borders = true
 # delivery = "off"
 
 # Play sounds when agents change state in background workspaces
+delivery = "terminal"
 [ui.sound]
 # enabled = true
 # Optional custom mp3 sound files. Relative paths are resolved from this config file's directory.

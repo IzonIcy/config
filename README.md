@@ -5,8 +5,8 @@ My personal configuration files for macOS development.
 ## Quick Setup (new machine)
 
 ```bash
-git clone https://github.com/IzonIcy/config.git ~/.dotfiles
-cd ~/.dotfiles
+git clone https://github.com/IzonIcy/config.git ~/.config
+cd ~/.config
 ./install.fish
 exec fish
 ```
@@ -15,18 +15,30 @@ exec fish
 
 | Tool | Config Location | Purpose |
 |------|----------------|---------|
+| **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings |
+| **atuin** | `atuin/` | Shell history and Catppuccin theme |
+| **btop** | `btop/` | System monitor and themes |
+| **fastfetch** | `fastfetch/` | Shell greeting and system summary |
 | **git** | `git/config` | Aliases, delta diff, signed commits |
+| **gh** | `gh/config.yml` | GitHub CLI preferences and aliases |
+| **herdr** | `herdr/` | Terminal workspace manager and plugins |
 | **ghostty** | `ghostty/config` | Terminal (Catppuccin Mocha, ligatures, splits) |
+| **mactop** | `mactop/config.json` | macOS system monitor theme |
+| **mole** | `mole/` | Cleanup lists |
+| **opencode** | `opencode/` | Agent, skill, MCP, and formatter configuration |
 | **starship** | `starship/starship.toml` | Prompt (Catppuccin, git status, dir, langs) |
+| **spicetify** | `spicetify/` | Spotify themes and extensions |
 | **fish** | `fish/config.fish` | Shell (atuin, zoxide, eza, mise, abbreviations) |
 | **mise** | `mise/config.toml` | Tool versions (node, bun, rust, python) |
-| **nvim** | `nvim/` | Neovim (lazy.nvim, LSP, DAP, Catppuccin) |
+| **nvim** | `nvim/` | Separately owned Neovim configuration |
 
 ## Requirements
 
 - [mise](https://mise.jdx.dev/) — tool version manager
 - [fish](https://fishshell.com/) — shell
 - [ghostty](https://ghostty.org/) — terminal
+- [AeroSpace](https://github.com/nikitabobko/AeroSpace) — window manager
+- [JankyBorders](https://github.com/FelixKratz/JankyBorders) — window borders
 - [starship](https://starship.rs/) — prompt
 - [atuin](https://atuin.sh/) — shell history
 - [zoxide](https://github.com/ajeetdsouza/zoxide) — directory jumping
@@ -42,7 +54,9 @@ brew install mise fish ghostty starship atuin zoxide eza neovim
 
 1. Restart shell: `exec fish`
 2. Run `:Lazy sync` in nvim to install plugins
-3. Run `mise install` if tools weren't installed automatically
+3. Run `./install.fish --check-dependencies` to check installed tools
+4. Run `./install.fish --install-tools` to install pinned Mise tools
+5. Run `./install.fish --generate-completions` if completions are needed
 
 ## Structure
 
@@ -65,9 +79,14 @@ brew install mise fish ghostty starship atuin zoxide eza neovim
 └── ...
 ```
 
+This repository is the live `~/.config` directory. The installer checks the
+configuration directories in place and links AeroSpace to
+`~/.aerospace.toml`. Runtime state, caches, and generated completions are not
+source configuration.
+
 ## Fish Startup Timer
 
-Every interactive shell shows startup time:
+Set `FISH_STARTUP_TIMER=1` to show startup time for an interactive shell:
 ```
 fish startup: 42ms
 ```

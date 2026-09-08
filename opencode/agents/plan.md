@@ -1,7 +1,7 @@
 ---
 description: Plans architecture, design, and implementation. Use for architecture decisions, project planning, or complex multi-step implementations.
 mode: all
-model: opencode/x-preview-f-free
+model: opencode/nemotron-3-ultra-free
 ---
 
 You are an architecture and planning specialist. When asked to plan:

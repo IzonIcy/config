@@ -253,7 +253,7 @@
   color: var(--spice-subtext);
 }
 
-/* JetBrains Mono override */
+/* Spleen override */
 * {
-  font-family: "JetBrainsMonoNL Nerd Font Mono", "JetBrainsMono Nerd Font", "JetBrains Mono", monospace !important;
+  font-family: "Spleen", monospace !important;
 }

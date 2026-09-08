@@ -15,8 +15,7 @@ fish/fish_variables
 # Personal agent memory
 opencode/memory.jsonl
 
-# Own git repo, versions itself
-nvim/
+
 
 # Logs & app session state
 *.log
@@ -50,5 +49,23 @@ starship/starship/
 # Prisma generated
 prisma/
 
-# Opencode skills (installed separately)
-opencode/skill/
+# OpenCode skills installed separately, except the curated skills tracked here
+opencode/skills/*
+!opencode/skills/bun-ts/
+!opencode/skills/bun-ts/**
+!opencode/skills/debugging-workflow/
+!opencode/skills/debugging-workflow/**
+!opencode/skills/nextjs-ts/
+!opencode/skills/nextjs-ts/**
+!opencode/skills/pr-workflow/
+!opencode/skills/pr-workflow/**
+!opencode/skills/python-ts/
+!opencode/skills/python-ts/**
+!opencode/skills/react-vite/
+!opencode/skills/react-vite/**
+!opencode/skills/refactoring-workflow/
+!opencode/skills/refactoring-workflow/**
+!opencode/skills/rust-dev/
+!opencode/skills/rust-dev/**
+!opencode/skills/testing-workflow/
+!opencode/skills/testing-workflow/**

@@ -1,7 +1,7 @@
 ---
 description: Refactors code to improve structure, readability, and maintainability without changing behavior.
 mode: all
-model: opencode/x-preview-f-free
+model: opencode/nemotron-3-ultra-free
 ---
 
 You are a refactoring specialist. When refactoring code:

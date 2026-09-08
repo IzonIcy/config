@@ -9,7 +9,7 @@
 
 /* user settings */
 :root {
-    --font-family: "JetBrainsMonoNL Nerd Font Mono", "JetBrainsMono Nerd Font", monospace;
+    --font-family: "Spleen", monospace;
     /*
     --font-family: 'Anonymous Pro', monospace;
     --font-family: 'Azeret Mono', monospace;
@@ -21,7 +21,7 @@
     --font-family: 'Fira Code', monospace;
     --font-family: 'Fira Mono', monospace;
     --font-family: 'IBM Plex Mono', monospace;
-    --font-family: 'JetBrains Mono', monospace;
+    --font-family: 'Spleen', monospace;
     --font-family: 'M PLUS 1 Code', monospace;
     --font-family: 'Major Mono Display', monospace;
     --font-family: 'Monofett', monospace;
@@ -223,10 +223,30 @@ div:has(> .main-entityHeader-container) {
 }
 
 /* recolor */
-/* NOTE: removed the theme's monochrome flattening (sidebar/player/card/etc.
-   remapped to --spice-main) so the official Catppuccin Mocha surface
-   layering from color.ini flows through. */
 :root {
+    --spice-main-elevated: var(--spice-main);
+    --spice-highlight-elevated: var(--spice-main);
+    --spice-sidebar: var(--spice-main);
+    --spice-player: var(--spice-main);
+    --spice-card: var(--spice-main);
+    --spice-shadow: var(--spice-main);
+    --spice-selected-row: var(--spice-subtext);
+    --spice-button: var(--spice-accent);
+    --spice-button-active: var(--spice-accent-active);
+    --spice-button-disabled: var(--spice-accent-inactive);
+    --spice-tab-active: var(--spice-main);
+    --spice-rgb-main-elevated: var(--spice-rgb-main);
+    --spice-rgb-highlight-elevated: var(--spice-rgb-main);
+    --spice-rgb-sidebar: var(--spice-rgb-main);
+    --spice-rgb-player: var(--spice-rgb-main);
+    --spice-rgb-card: var(--spice-rgb-main);
+    --spice-rgb-shadow: var(--spice-rgb-main);
+    --spice-rgb-selected-row: var(--spice-rgb-subtext);
+    --spice-rgb-button: var(--spice-rgb-accent);
+    --spice-rgb-button-active: var(--spice-rgb-accent-active);
+    --spice-rgb-button-disabled: var(--spice-rgb-accent-inactive);
+    --spice-rgb-tab-active: var(--spice-rgb-main);
+
     --text-subdued: var(--spice-subtext) !important;
 }
 .encore-dark-theme,
@@ -1019,44 +1039,4 @@ button[data-testid="control-button-npv-episodes"] svg {
 }
 .main-connectBar-connectBar svg {
     fill: var(--spice-accent-active);
-}
-
-/* === Rich Vesper visual tweaks === */
-
-/* Rounder playlist/album art */
-.main-entityHeader-image,
-.main-cardImage-image,
-.main-playlistImage-image {
-    border-radius: 8px !important;
-}
-
-/* Slightly transparent sidebar for depth */
-.Root__nav-bar {
-    background: rgba(16, 16, 16, 0.85) !important;
-}
-
-/* Softer scrollbar */
-.os-scrollbar-handle {
-    background: var(--spice-subtext) !important;
-    opacity: 0.4 !important;
-}
-.os-scrollbar-handle:hover {
-    opacity: 0.7 !important;
-}
-
-/* Accent colored play buttons */
-.main-playButton-button {
-    color: #FFC799 !important;
-}
-
-/* Highlight selected sidebar items */
-.main-navBar-navBarLinkActive,
-.main-navBar-navBarItemActive {
-    background: rgba(255, 199, 153, 0.15) !important;
-    border-radius: 4px;
-}
-
-/* 75% UI zoom */
-:root {
-    zoom: 0.75;
 }

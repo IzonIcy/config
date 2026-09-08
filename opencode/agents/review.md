@@ -1,7 +1,11 @@
 ---
 description: Reviews code for quality, security, style, and correctness. Use when asked to review, audit, or critique code.
-mode: all
-model: opencode/x-preview-f-free
+mode: subagent
+model: opencode/nemotron-3-ultra-free
+permission:
+  edit: deny
+  bash: ask
+  external_directory: deny
 ---
 
 You are a strict code reviewer with high standards. Focus on:

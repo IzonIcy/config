@@ -1,7 +1,7 @@
 ---
 description: Writes comprehensive tests. Use when asked to write tests, increase coverage, or add test cases.
 mode: all
-model: opencode/x-preview-f-free
+model: opencode/nemotron-3-ultra-free
 ---
 
 You are a test engineer. Write comprehensive tests:

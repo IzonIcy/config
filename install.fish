@@ -1,63 +1,201 @@
 #!/usr/bin/env fish
-# Dotfiles bootstrap — run once on a new machine
+# Check and bootstrap configuration stored directly in ~/.config.
 
 set -l DOTFILES_DIR (realpath (dirname (status filename)))
-set -l TARGET_DIR ~/.config
+set -l TARGET_DIR "$HOME/.config"
+set -l install_tools false
+set -l generate_completions false
+set -l check_dependencies false
 
-echo "Bootstrapping dotfiles from $DOTFILES_DIR → $TARGET_DIR"
+for arg in $argv
+    switch $arg
+        case --install-tools
+            set install_tools true
+        case --generate-completions
+            set generate_completions true
+        case --check-dependencies
+            set check_dependencies true
+        case '*'
+            echo "Unknown option: $arg" >&2
+            echo "Usage: ./install.fish [--install-tools] [--generate-completions] [--check-dependencies]" >&2
+            exit 2
+    end
+end
 
-# Configs to symlink
-set -l configs \
-    git \
-    ghostty \
-    starship \
-    fish \
-    mise \
-    nvim
+if not test -d "$TARGET_DIR"
+    mkdir -p "$TARGET_DIR"
+end
 
-for c in $configs
-    set -l src "$DOTFILES_DIR/$c"
-    set -l dst "$TARGET_DIR/$c"
+echo "Checking configuration in $DOTFILES_DIR"
 
-    if test -e "$dst"; and not test -L "$dst"
-        echo "⚠ $dst exists and is not a symlink — skipping"
-        continue
+function check_config --argument-names name source_root target_root
+    set -l src "$source_root/$name"
+    set -l dst "$target_root/$name"
+
+    if not test -e "$src"; and not test -L "$src"
+        echo "✗ Missing: $src" >&2
+        return 1
+    end
+
+    if test "$src" = "$dst"
+        echo "✓ $name"
+        return 0
     end
 
     if test -L "$dst"
         set -l current (readlink "$dst")
         if test "$current" = "$src"
-            echo "✓ $c already linked"
-            continue
+            echo "✓ $name already linked"
         else
-            echo "↻ $c points elsewhere — relinking"
+            echo "! $dst points to $current, expected $src" >&2
+            return 1
+        end
+        return 0
+    end
+
+    if test -e "$dst"
+        echo "! $dst exists and is not a symlink" >&2
+        return 1
+    end
+
+    if ln -s "$src" "$dst"
+        echo "✓ Linked $name"
+    else
+        echo "✗ Failed to link $name" >&2
+        return 1
+    end
+end
+
+set -l configs \
+    atuin \
+    btop \
+    fastfetch \
+    fish \
+    gh \
+    ghostty \
+    git \
+    herdr \
+    mactop \
+    mise \
+    mole \
+    opencode \
+    spicetify \
+    starship
+
+set -l failed false
+for config in $configs
+    check_config $config "$DOTFILES_DIR" "$TARGET_DIR"; or set failed true
+end
+
+# AeroSpace reads this file from the home directory, not from XDG_CONFIG_HOME.
+set -l aerospace_src "$DOTFILES_DIR/aerospace/aerospace.toml"
+set -l aerospace_dst "$HOME/.aerospace.toml"
+if test -e "$aerospace_src"
+    if test -L "$aerospace_dst"
+        set -l current (readlink "$aerospace_dst")
+        if test "$current" = "$aerospace_src"
+            echo "✓ aerospace already linked"
+        else
+            echo "! $aerospace_dst points to $current, expected $aerospace_src" >&2
+            set failed true
+        end
+    else if test -e "$aerospace_dst"
+        echo "! $aerospace_dst exists and is not a symlink" >&2
+        set failed true
+    else
+        if ln -s "$aerospace_src" "$aerospace_dst"
+            echo "✓ Linked aerospace"
+        else
+            echo "✗ Failed to link aerospace" >&2
+            set failed true
+        end
+    end
+else
+    echo "✗ Missing: $aerospace_src" >&2
+    set failed true
+end
+
+if $failed
+    echo "Configuration check failed. No tools or completions were changed." >&2
+    exit 1
+end
+
+if $check_dependencies
+    set -l required_commands fish mise atuin
+    set -l optional_commands starship zoxide eza fastfetch aerospace borders ghostty herdr mole spicetify
+
+    for command_name in $required_commands
+        if not command -q $command_name
+            echo "✗ Missing required command: $command_name" >&2
+            set failed true
         end
     end
 
-    ln -sf "$src" "$dst"
-    echo "✓ Linked $c"
+    for command_name in $optional_commands
+        if not command -q $command_name
+            echo "! Missing optional command: $command_name" >&2
+        end
+    end
 end
 
-# Ensure fish completions dir exists
-mkdir -p ~/.config/fish/completions
-
-# Install mise tools if mise is available
-if command -q mise
-    echo "Installing mise tools..."
-    mise install
-else
-    echo "mise not found — install it first: https://mise.jdx.dev/getting-started.html"
+if $failed
+    echo "Dependency check failed. No tools or completions were changed." >&2
+    exit 1
 end
 
-# Generate fish completions for tools that support it
-if command -q mise
-    mise completion fish > ~/.config/fish/completions/mise.fish
+if $install_tools
+    if command -q mise
+        echo "Installing Mise tools..."
+        mise install; or set failed true
+    else
+        echo "! mise not found, cannot install tools" >&2
+        set failed true
+    end
 end
-if command -q atuin
-    atuin gen-completions --shell fish > ~/.config/fish/completions/atuin.fish
-end
-# zoxide completions are handled by `zoxide init fish` in config.fish
-# eza doesn't have built-in completion generation
 
-echo ""
-echo "Done. Restart your shell or run: exec fish"
+if $failed
+    echo "Tool installation failed. Completions were not generated." >&2
+    exit 1
+end
+
+if $generate_completions
+    if not mkdir -p "$TARGET_DIR/fish/completions"
+        echo "✗ Could not create Fish completions directory" >&2
+        exit 1
+    end
+
+    if command -q mise
+        set -l output "$TARGET_DIR/fish/completions/mise.fish"
+        set -l temporary "$output.tmp.$fish_pid"
+        if mise completion fish > "$temporary"; and test -s "$temporary"
+            mv "$temporary" "$output"
+        else
+            rm -f "$temporary"
+            echo "✗ Could not generate Mise completions" >&2
+            set failed true
+        end
+    else
+        echo "! mise not found, skipping Mise completions" >&2
+    end
+
+    if command -q atuin
+        set -l output "$TARGET_DIR/fish/completions/atuin.fish"
+        set -l temporary "$output.tmp.$fish_pid"
+        if atuin gen-completions --shell fish > "$temporary"; and test -s "$temporary"
+            mv "$temporary" "$output"
+        else
+            rm -f "$temporary"
+            echo "✗ Could not generate Atuin completions" >&2
+            set failed true
+        end
+    else
+        echo "! atuin not found, skipping Atuin completions" >&2
+    end
+end
+
+if $failed
+    echo "Configuration check failed." >&2
+    exit 1
+end
+
+echo "Configuration check passed."

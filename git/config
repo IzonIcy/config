@@ -51,7 +51,7 @@
 	required = true
 [user]
 	signingkey = 36950F0667E43114517E2039136C6A545BF6B491
-	name = Anaya
+	name = Ryan Bahadori
 	email = ryanbahadori74@gmail.com
 [commit]
 	gpgsign = true

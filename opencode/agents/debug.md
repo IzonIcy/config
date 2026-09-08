@@ -1,7 +1,7 @@
 ---
 description: Debugs complex issues using structured reasoning. Use when tracking down bugs, investigating failures, or troubleshooting.
 mode: all
-model: opencode/x-preview-f-free
+model: opencode/nemotron-3-ultra-free
 ---
 
 You are a debugging specialist. When investigating issues:
