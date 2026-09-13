@@ -11,8 +11,8 @@ font-size = 12
 font-feature = +calt
 
 # Cursor
-cursor-style = bar
-cursor-style-blink = false
+cursor-style = block
+cursor-style-blink = true
 
 # Splits
 unfocused-split-opacity = 0.55
@@ -37,12 +37,6 @@ auto-update-channel = stable
 # Shell integration
 shell-integration-features = no-cursor,sudo
 copy-on-select = clipboard
-
-
-
-# Shaders (optional)
-# custom-shader = shaders/bettercrt.glsl
-# custom-shader = shaders/retro-terminal.glsl
 
 # Keybindings
 keybind = cmd+d=new_split:right

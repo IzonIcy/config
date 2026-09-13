@@ -146,7 +146,7 @@ require("lazy").setup({
 	},
 	{ "emmanueltouzery/decisive.nvim", ft = "csv" },
 
-	-- search, terminal, git
+	-- search, terminal, and git
 	{
 		"ibhagwan/fzf-lua",
 		cmd = "FzfLua",

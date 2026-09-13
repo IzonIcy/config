@@ -1,3 +1,42 @@
+# Personal Preferences (Global)
+
+## Language
+
+- Never use `any` unless 100% necessary or specifically instructed.
+- TypeScript strict mode; prefer inferred types over annotations. `any` is the enemy.
+
+## Commands
+
+- Don't run dev servers — assume they're running.
+- Don't run build commands unless specifically told to.
+- Focus on check commands: `bun run typecheck`, `bun run lint`, `tsc --noEmit`, `cargo check`, `go vet ./...`
+
+## Package Managers
+
+- Use pnpm if the project already uses it, otherwise use bun.
+- Never use npm or yarn.
+
+## Tech Stack Defaults
+
+When uncertain, prefer: Tailwind, TypeScript, Bun, React, Convex, Clerk, Vercel.
+(Replace with _your_ actual defaults — this is just a starting template)
+
+## Code Style
+
+- Always strive for concise, simple solutions.
+- If a problem can be solved in a simpler way, propose it.
+- Explicit > implicit. Immutable patterns where practical.
+- Minimize dependencies — every package is a liability.
+- Complexity belongs at the adapter boundary. Orchestration stays pure, UI stays dumb.
+
+## General
+
+- If asked to do too much work at once, stop and state that clearly.
+- For computer-use verification: shell out to external tool if helpful.
+- If a rule here fights the task in front of you, say so loudly and get a human sign-off before breaking it.
+
+---
+
 # Universal Agent Guidelines
 
 Look, I'm not gonna write a novel here. This file is the ground rules for how you should operate. Read it, internalize it, don't be annoying about it.
@@ -35,17 +74,17 @@ You have specialized subagents available via the `task` tool. Use them. Automati
 
 **Fallback:** If the environment does not provide the `task` tool or the requested subagent type, don't refuse or ask — just handle the work inline yourself and note which subagent you would have used.
 
-| Task | Who |
-|------|-----|
-| Code review / audit | @review |
-| Writing tests | @test |
-| Bug fixes / debugging | @debug |
+| Task                        | Who       |
+| --------------------------- | --------- |
+| Code review / audit         | @review   |
+| Writing tests               | @test     |
+| Bug fixes / debugging       | @debug    |
 | Refactoring / restructuring | @refactor |
-| Explaining code | @explain |
-| Writing documentation | @docs |
-| Writing commit messages | @commit |
-| Auto-fixing lint/style | @fix |
-| Architecture planning | @plan |
+| Explaining code             | @explain  |
+| Writing documentation       | @docs     |
+| Writing commit messages     | @commit   |
+| Auto-fixing lint/style      | @fix      |
+| Architecture planning       | @plan     |
 
 When the user explicitly asks for subagents ("use sub agents", "@debug", etc.), honor it — delegate via the `task` tool rather than doing the work inline (if available; otherwise apply the fallback above).
 
@@ -62,6 +101,7 @@ When the user explicitly asks for subagents ("use sub agents", "@debug", etc.), 
 ## Memory Persistence
 
 Use the `memory` tool to persist stuff across sessions:
+
 - **Project quirks** — Weird build steps, common errors, workarounds
 - **Personal preferences** — Coding style stuff not in config
 - **Architecture decisions** — Why you chose X over Y
@@ -73,20 +113,21 @@ Skills are reusable workflow instructions stored as `SKILL.md` files under `~/.c
 
 ### Auto-trigger routing
 
-| Situation | Skill |
-|-----------|-------|
+| Situation                                                       | Skill                                                                                                    |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | User asks for a non-trivial feature, refactor, or design change | **grill-with-docs** — interview BEFORE writing code; build the project's CONTEXT.md vocabulary as you go |
-| User floats an underbaked plan, idea, or decision (non-code) | **grill-me** |
-| Alignment reached on spec-worthy work | **to-spec** to publish it, then offer **to-tickets** |
-| Executing a spec or tickets | **implement** — drives tdd + code-review at pre-agreed seams |
-| Building anything with testable behavior | **tdd** — red-green-refactor, failing test FIRST |
-| Bug resists the obvious fix, or repro is unclear | **diagnosing-bugs** — feedback loop → minimise → hypothesise → fix → regression-test |
-| Meaningful changes done, about to commit | **code-review** before committing |
-| User says "wait what", "huh?", or clearly didn't follow | **wait-what** — re-pitch with the missing context, plain English |
-| Long session wrapping up with work remaining | **handoff** — compact into a handoff doc for the next agent |
-| User mentions shoehorn / `as` assertions in tests | **migrate-to-shoehorn** |
-| User wants pre-commit hooks / Husky / lint-staged | **setup-pre-commit** |
-| User wants exercise scaffolds (sections/problems/solutions) | **scaffold-exercises** |
+| User floats an underbaked plan, idea, or decision (non-code)    | **grill-me**                                                                                             |
+| Alignment reached on spec-worthy work                           | **to-spec** to publish it, then offer **to-tickets**                                                     |
+| Executing a spec or tickets                                     | **implement** — drives tdd + code-review at pre-agreed seams                                             |
+| Building anything with testable behavior                        | **tdd** — red-green-refactor, failing test FIRST                                                         |
+| Bug resists the obvious fix, or repro is unclear                | **diagnosing-bugs** — feedback loop → minimise → hypothesise → fix → regression-test                     |
+| Meaningful changes done, about to commit                        | **code-review** before committing                                                                        |
+| User says "wait what", "huh?", or clearly didn't follow         | **wait-what** — re-pitch with the missing context, plain English                                         |
+| Long session wrapping up with work remaining                    | **handoff** — compact into a handoff doc for the next agent                                              |
+| User mentions shoehorn / `as` assertions in tests               | **migrate-to-shoehorn**                                                                                  |
+| User wants pre-commit hooks / Husky / lint-staged               | **setup-pre-commit**                                                                                     |
+| User wants exercise scaffolds (sections/problems/solutions)     | **scaffold-exercises**                                                                                   |
+| Writing docs, commit messages, PR descriptions                  | **unslop** — cut AI tells, add human voice                                                               |
 
 Composition with existing workflows: **testing-workflow** still governs test style and framework discovery; **tdd** governs the dev loop. **debugging-workflow** handles simple bugs; when it gets hard, **diagnosing-bugs** takes over.
 
