@@ -7,7 +7,6 @@
 	diffFilter = delta --color-only
 
 [delta]
-	syntax-theme = "Catppuccin Mocha"
 	side-by-side = true
 	line-numbers = true
 
@@ -61,19 +60,3 @@
 [color]
 	ui = true
 
-[color "branch"]
-	current = #a6e3a1 bold
-	local = #89b4fa
-	remote = #cba6f7
-
-[color "diff"]
-	meta = #f9e2af bold
-	frag = #cba6f7 bold
-	old = #f38ba8 bold
-	new = #a6e3a1 bold
-	commit = #f9e2af
-
-[color "status"]
-	added = #a6e3a1
-	changed = #f9e2af
-	untracked = #f38ba8
