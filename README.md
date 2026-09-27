@@ -23,7 +23,6 @@ exec fish
 | **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases              |
 | **herdr**     | `herdr/`                   | Terminal workspace manager and plugins          |
 | **ghostty**   | `ghostty/config`           | Terminal (default colors, ligatures, splits)    |
-| **mactop**    | `mactop/config.json`       | macOS system monitor theme                      |
 | **mole**      | `mole/`                    | Cleanup lists                                   |
 | **opencode**  | `opencode/`                | Agent, skill, MCP, and formatter configuration  |
 | **spicetify** | `spicetify/`               | Spotify themes and extensions                   |
