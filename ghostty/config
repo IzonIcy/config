@@ -1,6 +1,3 @@
-# Theme (bundled theme - exact filename so it resolves in any launch env)
-theme = Catppuccin Mocha
-
 # Transparency
 background-opacity = 0.75
 background-blur-radius = 25
@@ -16,7 +13,6 @@ cursor-style-blink = true
 
 # Splits
 unfocused-split-opacity = 0.55
-split-divider-color = #585b70
 
 # macOS
 macos-titlebar-style = tabs
