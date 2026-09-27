@@ -75,7 +75,6 @@ set -l configs \
     ghostty \
     git \
     herdr \
-    mactop \
     mise \
     mole \
     opencode \
