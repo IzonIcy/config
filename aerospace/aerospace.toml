@@ -13,8 +13,7 @@ after-login-command = []
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-# JankyBorders - Catppuccin gradient (original config style)
-after-startup-command = ['exec-and-forget borders active_color=gradient(top_left=0xffcba6f7,bottom_right=0xff89b4fa) inactive_color=0xff45475a width=4.0 style=round hidpi=on']
+after-startup-command = []
 
 # Start AeroSpace at login
 start-at-login = true

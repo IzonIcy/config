@@ -6,16 +6,13 @@
 onboarding = false
 
 [theme]
-# Built-in themes: catppuccin(-latte), terminal, tokyo-night(-day), dracula, nord,
-#                  gruvbox(-light), one-dark, one-light, solarized(-light),
-#                  kanagawa(-lotus), rose-pine(-dawn), vesper
-name = "catppuccin"
+# Built-in themes: terminal, tokyo-night(-day), dracula, nord, gruvbox(-light),
+#                  one-dark, one-light, solarized(-light), kanagawa(-lotus),
+#                  rose-pine(-dawn), vesper
+name = "terminal"
 
 # Override individual color tokens on top of the base theme.
 # Accepts: hex (#rrggbb), named colors, rgb(r,g,b), or panel_bg = "reset"
-# accent = "#89b4fa"
-# red = "#ff6188"
-# green = "#a6e3a1"
 
 [terminal]
 # Executable used for new interactive panes.
@@ -196,7 +193,7 @@ show_agent_labels_on_pane_borders = true
 # agent_panel_scope = "all"
 
 # Accent color for highlights, borders, and navigation UI.
-# Accepts: hex (#89b4fa), named colors (cyan, blue, magenta), or rgb(r,g,b)
+# Accepts: hex (#00afff), named colors (cyan, blue, magenta), or rgb(r,g,b)
 # accent = "cyan"
 
 # Background notification popup delivery

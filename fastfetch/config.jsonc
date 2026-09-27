@@ -2,9 +2,6 @@
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
     "source": "~/.config/fastfetch/anime.txt",
-    "color": {
-      "1": "#cba6f7",
-    },
     "padding": {
       "top": 2,
       "right": 6,
@@ -19,62 +16,43 @@
     {
       "type": "title",
       "keyWidth": 10,
-      "color": "#cba6f7",
     },
     "break",
     {
       "type": "os",
       "key": "󰌚 ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "host",
       "key": "󰍹 ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "kernel",
       "key": "ﯟ ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "uptime",
       "key": " ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "shell",
       "key": ">_",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "terminal",
       "key": " ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "cpu",
       "key": "󰍛 ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "gpu",
       "key": "󰢮 ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     {
       "type": "memory",
       "key": " ",
-      "keyColor": "#cba6f7",
-      "color": "#cdd6f4",
     },
     "break",
     "break",
