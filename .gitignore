@@ -6,7 +6,6 @@
 *.db-shm
 *.db-wal
 *.sqlite*
-configstore/
 
 # Secrets / machine-local auth
 gh/hosts.yml
