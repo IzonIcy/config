@@ -30,6 +30,8 @@ node_modules/
 # Raycast (extensions/ is a 600MB+ installed-extension cache)
 raycast/extensions/
 raycast/ai/
+# node-compile-cache/ is regenerated V8 bytecode on every Raycast launch
+raycast/node-compile-cache/
 # config.json contains a live API token — never commit it
 raycast/config.json
 
