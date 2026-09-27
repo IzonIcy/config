@@ -79,8 +79,7 @@ set -l configs \
     mise \
     mole \
     opencode \
-    spicetify \
-    starship
+    spicetify
 
 set -l failed false
 for config in $configs
@@ -122,7 +121,7 @@ end
 
 if $check_dependencies
     set -l required_commands fish mise atuin
-    set -l optional_commands starship zoxide eza fastfetch aerospace borders ghostty herdr mole spicetify
+    set -l optional_commands zoxide eza fastfetch aerospace borders ghostty herdr mole spicetify
 
     for command_name in $required_commands
         if not command -q $command_name

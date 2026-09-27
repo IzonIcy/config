@@ -9,17 +9,11 @@ if test -d "$HOME/.local/bin"
     fish_add_path --global "$HOME/.local/bin"
 end
 
-set -gx STARSHIP_CONFIG "$HOME/.config/starship/starship.toml"
 set -gx BAT_THEME ansi
 
 if status is-interactive
     if set -q FISH_STARTUP_TIMER
         set -g __fish_startup_start (date +%s%N | cut -c1-13)
-    end
-
-    # Starship prompt
-    if command -q starship
-        starship init fish | source
     end
 
     # Atuin shell history
@@ -76,3 +70,7 @@ if status is-interactive
         set_color normal
     end
 end
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/Users/ryanbahadori/.local/bin" $PATH
