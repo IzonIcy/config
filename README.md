@@ -13,24 +13,23 @@ exec fish
 
 ## What's Included
 
-| Tool | Config Location | Purpose |
-|------|----------------|---------|
-| **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings |
-| **atuin** | `atuin/` | Shell history and Catppuccin theme |
-| **btop** | `btop/` | System monitor and themes |
-| **fastfetch** | `fastfetch/` | Shell greeting and system summary |
-| **git** | `git/config` | Aliases, delta diff, signed commits |
-| **gh** | `gh/config.yml` | GitHub CLI preferences and aliases |
-| **herdr** | `herdr/` | Terminal workspace manager and plugins |
-| **ghostty** | `ghostty/config` | Terminal (Catppuccin Mocha, ligatures, splits) |
-| **mactop** | `mactop/config.json` | macOS system monitor theme |
-| **mole** | `mole/` | Cleanup lists |
-| **opencode** | `opencode/` | Agent, skill, MCP, and formatter configuration |
-| **starship** | `starship/starship.toml` | Prompt (Catppuccin, git status, dir, langs) |
-| **spicetify** | `spicetify/` | Spotify themes and extensions |
-| **fish** | `fish/config.fish` | Shell (atuin, zoxide, eza, mise, abbreviations) |
-| **mise** | `mise/config.toml` | Tool versions (node, bun, rust, python) |
-| **nvim** | `nvim/` | Separately owned Neovim configuration |
+| Tool          | Config Location            | Purpose                                         |
+| ------------- | -------------------------- | ----------------------------------------------- |
+| **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings    |
+| **atuin**     | `atuin/`                   | Shell history                                   |
+| **btop**      | `btop/`                    | System monitor and themes                       |
+| **fastfetch** | `fastfetch/`               | Shell greeting and system summary               |
+| **git**       | `git/config`               | Aliases, delta diff, signed commits             |
+| **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases              |
+| **herdr**     | `herdr/`                   | Terminal workspace manager and plugins          |
+| **ghostty**   | `ghostty/config`           | Terminal (default colors, ligatures, splits)    |
+| **mactop**    | `mactop/config.json`       | macOS system monitor theme                      |
+| **mole**      | `mole/`                    | Cleanup lists                                   |
+| **opencode**  | `opencode/`                | Agent, skill, MCP, and formatter configuration  |
+| **spicetify** | `spicetify/`               | Spotify themes and extensions                   |
+| **fish**      | `fish/config.fish`         | Shell (atuin, zoxide, eza, mise, abbreviations) |
+| **mise**      | `mise/config.toml`         | Tool versions (node, bun, rust, python)         |
+| **nvim**      | `nvim/`                    | Separately owned Neovim configuration           |
 
 ## Requirements
 
@@ -38,16 +37,15 @@ exec fish
 - [fish](https://fishshell.com/) — shell
 - [ghostty](https://ghostty.org/) — terminal
 - [AeroSpace](https://github.com/nikitabobko/AeroSpace) — window manager
-- [JankyBorders](https://github.com/FelixKratz/JankyBorders) — window borders
-- [starship](https://starship.rs/) — prompt
 - [atuin](https://atuin.sh/) — shell history
 - [zoxide](https://github.com/ajeetdsouza/zoxide) — directory jumping
 - [eza](https://github.com/eza-community/eza) — modern ls
 - [neovim](https://neovim.io/) — editor
 
 Install via Homebrew:
+
 ```bash
-brew install mise fish ghostty starship atuin zoxide eza neovim
+brew install mise fish ghostty atuin zoxide eza neovim
 ```
 
 ## Post-Install
@@ -65,7 +63,6 @@ brew install mise fish ghostty starship atuin zoxide eza neovim
 ├── install.fish          # Bootstrap script
 ├── git/
 ├── ghostty/
-├── starship/
 ├── fish/
 │   ├── config.fish       # Main config (sources conf.d/*)
 │   ├── conf.d/           # Modular configs
@@ -87,14 +84,17 @@ source configuration.
 ## Fish Startup Timer
 
 Set `FISH_STARTUP_TIMER=1` to show startup time for an interactive shell:
+
 ```
 fish startup: 42ms
 ```
+
 Yellow if > 100ms.
 
 ## Neovim Startup
 
 ~84ms (headless). Run benchmark:
+
 ```bash
 nvim --startuptime /tmp/startup.log --headless -c "quit"
 tail -5 /tmp/startup.log
