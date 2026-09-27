@@ -7,6 +7,15 @@ end
 local pickers = require("config.pickers")
 local theme = require("config.theme")
 
+-- FTerm instances are built lazily, so these require on call.
+vim.api.nvim_create_user_command("Claude", function()
+	require("plugins.fterm").claude:toggle()
+end, { desc = "Toggle Claude Code" })
+
+vim.api.nvim_create_user_command("Htop", function()
+	require("plugins.fterm").htop:toggle()
+end, { desc = "Toggle htop" })
+
 -- set leader
 map({ "n", "v" }, "<Space>", "<Nop>", "Disable space default behavior")
 
@@ -85,6 +94,7 @@ end, "Toggle floating terminal")
 map("n", "<leader>ac", function()
 	require("plugins.fterm").claude:toggle()
 end, "Toggle Claude Code")
+map("n", "<leader>;", ":", "Command line")
 map("n", "<leader>w", "<Cmd>w<CR>", "Write file")
 map("n", "<leader>d", function()
 	vim.ui.input({ prompt = "Write copy to: ", completion = "file" }, function(path)
