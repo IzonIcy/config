@@ -1,3 +1,6 @@
+# Theme
+theme = Builtin Light
+
 # Transparency
 background-opacity = 0.75
 background-blur-radius = 25

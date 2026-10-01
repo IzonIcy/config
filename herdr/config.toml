@@ -9,7 +9,7 @@ onboarding = false
 # Built-in themes: terminal, tokyo-night(-day), dracula, nord, gruvbox(-light),
 #                  one-dark, one-light, solarized(-light), kanagawa(-lotus),
 #                  rose-pine(-dawn), vesper
-name = "terminal"
+name = "tokyo-night-day"
 
 # Override individual color tokens on top of the base theme.
 # Accepts: hex (#rrggbb), named colors, rgb(r,g,b), or panel_bg = "reset"

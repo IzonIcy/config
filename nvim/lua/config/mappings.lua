@@ -7,6 +7,15 @@ end
 local pickers = require("config.pickers")
 local theme = require("config.theme")
 
+-- FTerm instances are built lazily, so these require on call.
+vim.api.nvim_create_user_command("Claude", function()
+	require("plugins.fterm").claude:toggle()
+end, { desc = "Toggle Claude Code" })
+
+vim.api.nvim_create_user_command("Htop", function()
+	require("plugins.fterm").htop:toggle()
+end, { desc = "Toggle htop" })
+
 -- set leader
 map({ "n", "v" }, "<Space>", "<Nop>", "Disable space default behavior")
 
@@ -80,9 +89,16 @@ map("n", "<leader>t", "<Cmd>NvimTreeToggle<CR>", "Toggle file tree")
 map("n", "<leader>p", theme.switch, "Cycle theme")
 map("n", "<leader>P", "<Cmd>Lazy<CR>", "Open plugin manager")
 map("n", "<leader>z", function()
-	require("FTerm").open()
-end, "Floating terminal")
-map("t", "<Esc>", [[<C-\><C-n><Cmd>lua require("FTerm").close()<CR>]], "Close floating terminal")
+	require("FTerm").toggle()
+end, "Toggle floating terminal")
+map("n", "<leader>ac", function()
+	require("plugins.fterm").claude:toggle()
+end, "Toggle Claude Code")
+map("n", "<leader>aC", function()
+	-- force = true, so the claude process dies instead of lingering
+	require("plugins.fterm").claude:close(true)
+end, "Close Claude Code")
+map("n", "<leader>;", ":", "Command line")
 map("n", "<leader>w", "<Cmd>w<CR>", "Write file")
 map("n", "<leader>d", function()
 	vim.ui.input({ prompt = "Write copy to: ", completion = "file" }, function(path)

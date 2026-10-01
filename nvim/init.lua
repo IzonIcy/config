@@ -158,9 +158,8 @@ require("lazy").setup({
 	{
 		"numToStr/FTerm.nvim",
 		cmd = "FTerm",
-		config = function()
-			require("plugins.fterm")
-		end,
+		-- No config fn: requiring plugins.fterm from here re-enters lazy
+		-- mid-load and errors. Mappings require it on demand instead.
 	},
 	{
 		"lewis6991/gitsigns.nvim",
