@@ -10,6 +10,13 @@
 # Secrets / machine-local auth
 gh/hosts.yml
 fish/fish_variables
+fish/conf.d/secrets.fish
+nvim/lua/config/secrets.lua
+opencode/auth.json
+.mcp.json
+*.pem
+*.p12
+*.pfx
 
 # Personal agent memory
 opencode/memory.jsonl
@@ -31,8 +38,11 @@ raycast/extensions/
 raycast/ai/
 # node-compile-cache/ is regenerated V8 bytecode on every Raycast launch
 raycast/node-compile-cache/
-# config.json contains a live API token — never commit it
+# Raycast extension endpoints carry live bearer tokens — never commit them.
+# Track aster-endpoint.example.json instead so the shape is documented.
 raycast/config.json
+raycast/*-endpoint.json
+!raycast/*-endpoint.example.json
 
 # Editor backups
 *.bak

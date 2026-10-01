@@ -7,4 +7,14 @@ M.htop = fterm:new({
 	cmd = "htop",
 })
 
+M.claude = fterm:new({
+	ft = "fterm_claude",
+	cmd = "claude",
+	-- Claude's TUI needs the width; the 0.8 default lands around 64 columns.
+	dimensions = { width = 0.95, height = 0.95, x = 0.5, y = 0.5 },
+})
+
+-- FTerm ships no commands of its own. They live in config/mappings.lua so
+-- they exist before FTerm lazy-loads, rather than only after first require.
+
 return M
