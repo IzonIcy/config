@@ -1,2 +1,8 @@
 node_modules/
+# Unredacted memory store and its backups. memory.public.jsonl is the
+# redacted copy that IS committed; these hold tailnet names, IPs and
+# account emails, so they stay local. Matches *.bak-<suffix> too, which the
+# root *.bak rule does not cover.
 memory.jsonl
+memory.jsonl.bak-*
+.redact.py
