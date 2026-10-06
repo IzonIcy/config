@@ -8,3 +8,6 @@ memory.jsonl.bak-*
 .redact.py
 # v2 writes the background service's auth token here. Secret, never commit.
 service.json
+# GitHub PAT for the github MCP server, read via {file:}. Secrets belong in
+# 600 files, not in a config that gets committed.
+.github-token
