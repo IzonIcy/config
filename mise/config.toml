@@ -1,5 +1,4 @@
 [tools]
 bun = "1.3.13"
 node = "26.4.0"
-rust = "stable"
 python = "3.13.12"
