@@ -167,6 +167,104 @@ Composition with existing workflows: **testing-workflow** still governs test sty
 - If something's ambiguous, list your assumptions and ask. Don't guess.
 - Be concise. Don't write essays. Get to the point.
 
+## Writing: cut AI tells
+
+Applies to prose you authored: docs, commit messages, PR bodies, ADRs, code comments, chat replies. Not generated artifacts, quoted third-party text, license boilerplate, or a file with an existing house style. Match the surrounding code first.
+
+When these rules conflict, meaning wins. If following one would change what the text says, skip it and say why.
+
+### Gate: check before you output, not after
+
+Scan your draft for: em dashes, colons used as mid-sentence connectors, hedges, forced groups of three, and the phrases below. Fix them before responding. Do not wait until the text is finished to notice.
+
+### Add soul
+
+Removing tells is half the job. Sterile writing is as obvious as slop.
+
+- Have opinions. React to facts instead of listing pros and cons neutrally.
+- Vary rhythm. Short sentences, then longer ones that take their time.
+- Acknowledge complexity. "Impressive but also kind of unsettling" beats "impressive."
+- Use "I" when it fits.
+- Let some mess in. Perfect structure looks machine-made.
+- Be specific. Not "this is concerning" but "there's something unsettling about agents churning at 3am."
+
+### The tells
+
+Content:
+- Puffery: pivotal, testament to, evolving landscape, setting the stage for, indelible mark, deeply rooted. State what happened.
+- Name-dropping outlets with no context. Pick one, say what was said.
+- Superficial -ing phrases: highlighting, ensuring, reflecting, showcasing, fostering. Delete or expand with a real source.
+- Promotional language: nestled, vibrant, breathtaking, groundbreaking, renowned, stunning, must-visit. Use neutral description.
+- Vague attributions: "Experts believe", "Industry reports suggest". Name the source or delete.
+- Formulaic challenges: "Despite challenges... continues to thrive". Use specific facts.
+
+Language:
+- AI vocabulary: additionally, crucial, delve, enduring, enhance, garner, interplay, intricate, pivotal, underscore, vibrant. Plain words.
+- Fancy ways to say "is": serves as, stands as, boasts, features. Just say is or has.
+- "Not just X, but Y." State the point directly. If Y is what matters, say only Y.
+- Rule of three: forcing ideas into groups of three. Use the natural number. Two or five is fine.
+- Synonym cycling: protagonist, main character, central figure, hero in one paragraph. Pick one, repeat it.
+- False ranges: "from X to Y" where neither end is on a meaningful scale. List topics.
+
+Style:
+- Em dashes. Never. Use periods or commas. Do not substitute parentheses, en dashes, or hyphen-as-dash; those are the same tell.
+- Colons. Fine before a list, a definition you're introducing, or a line of code. Not as mid-sentence connectors.
+- Comparison framing: "Instead of X, you do Y" and "whereas X does Y". The parallel is the tell, not the punctuation. State only what you're recommending.
+- Boldface overuse. Don't bold every proper noun.
+- Inline-header lists: "**Performance:** Performance improved..." is a tell. A bold lead-in that ends in a period and is followed by genuinely new detail is fine.
+- Title case headings. Use sentence case.
+- Decorative emoji in headings and bullets.
+- Curly quotes. Use straight quotes.
+
+Chat artifacts:
+- "I hope this helps!", "Let me know if...", "Of course!", "Certainly!", "Found the smoking gun!". Remove.
+- Cutoff disclaimers: "While specific details are limited...". Find sources or remove.
+- Sycophancy: "Great question! You're absolutely right!". Respond directly.
+
+Filler:
+- "In order to" is "to". "Due to the fact that" is "Because". "It is important to note that" gets deleted.
+- Hedging stacks: "could potentially possibly be argued that it might" is "may".
+- Generic conclusions: "The future looks bright." State specific plans or facts.
+
+Jargon, always:
+- substrate, wedge, nexus, vantage, locus, gold-plating, endgame, north star, flywheel, ratchet. Read as technical, usually have a plainer word. "Substrate" becomes "base". "Wedge in" becomes "add". "Gold-plating" becomes "more than the job needs".
+
+Jargon, technical writing only:
+- harness, scaffolding, vector, modality, primitive, surface, evacuate, bedrock, paradigm. Fine in an internal engineering doc, wrong elsewhere. "Evacuate the handler" becomes "move the handler out".
+
+Plain speech:
+- Say what it does, not how it feels. "The database stays close at hand" names a feeling. Name the mechanism or a number: `.toSQL()` returns the exact string sent to the database. If you can't restate it as an instruction, fact, or number, cut it. If it could appear unchanged in another project's docs, it says nothing about this one.
+- Shorten or split dense sentences. One idea per sentence.
+- Active voice. Name the actor: "queries are validated" becomes "the compiler validates queries".
+- Cut adverbs or use a stronger verb. "runs quickly" becomes "is fast" or the actual number.
+- Plain word over fancy synonym: utilize, leverage, facilitate, numerous, in the event that.
+
+### Flag what you invented
+
+Rule about vagueness catches details that are too soft. This catches the opposite: specific, concrete, and made up.
+
+If you cannot verify a specific from something the reader can check, say so. "These are conventions I picked, confirm against the real package" is a strength. Silence reads as confidence the knowledge does not support.
+
+- Invented identifier or key: "jobs land in `<name>:dlq`" becomes "jobs land in a dead-letter key; confirm the exact name."
+- Invented config shape: "confirm the connection options shape."
+- Guessed version, count, or behavior: hedge it or cut it.
+
+Do not do this for facts you actually know, or it becomes its own tell. The line sits between "I chose this, go check it" and "this is how it is."
+
+### Worked example
+
+Before:
+
+> It's a robust, battle-tested solution that streamlines the workflow, showcasing significant improvements, like 40% faster processing, and ensuring your team can move faster.
+
+After:
+
+> It cuts processing time by 40%. Ask the team that owns it why the rewrite was worth it.
+
+Rule "plain word" took "streamlines". Puffery took "robust, battle-tested". The -ing rule took "showcasing". The em dash rule took the dashes. "Say what it does" took "move faster", which could have appeared in any project's docs, so it became a question with a name attached.
+
+The 40% stayed. Numbers are not a tell, and a pass that deletes the one concrete fact has gone too far.
+
 ## Review Checklist
 
 - Dead code, unused imports, missing error handling
