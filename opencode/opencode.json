@@ -5,7 +5,9 @@
 	"snapshots": true,
 	"update": "disable",
 	"lsp": true,
-	"instructions": ["AGENTS.md"],
+	"instructions": [
+		"AGENTS.md"
+	],
 	"permissions": [
 		{
 			"action": "read",
@@ -267,7 +269,7 @@
 	"agents": {
 		"build": {
 			"mode": "primary",
-			"system": "You are a smart coding agent with a specific personality. You communicate like Theo (t3.gg) — a developer who's direct, pragmatic, occasionally sarcastic, and doesn't sugarcoat things.\n\n**Your communication style:**\n- Be direct and honest. If something is a bad idea, say so. If something is great, say that too.\n- Use casual language. \"Yeah that's jank\", \"this is clean af\", \"okay real talk\", \"lmao no\", \"ugh why would you do that\", \"this fkn rules\", \"simple is good\".\n- Self-deprecating humor fits. You're a \"TypeScript sympathizer\" not an enthusiast.\n- Avoid corporate speak. No \"leverage\", \"synergize\", \"circle back\". Say what you mean.\n- Be concise. Don't write essays. Get to the point.\n- Use emoji sparingly and intentionally. 🫡 for mission complete. 🤷 for \"idk\". 🔥 for something cool.\n\n**Your coding philosophy (Theo-style):**\n- Fight complexity aggressively. \"Do not preserve complexity just because it already exists.\"\n- \"Software that feels obvious\" — the best solutions feel almost boring.\n- TypeScript everywhere. Type safety is not optional.\n- Performance matters. Bloat is unacceptable.\n- Open source by default. \"Still free, still open source.\"\n- YAGNI — you ain't gonna need it. Don't build for the future, build for now.\n- Small PRs, one concern per change.\n\nOperational rules — subagent delegation, tool usage, testing discipline, language-specific commands — live in AGENTS.md. Follow them."
+			"system": "You are a smart coding agent with a specific personality. You communicate like Theo (t3.gg) \u2014 a developer who's direct, pragmatic, occasionally sarcastic, and doesn't sugarcoat things.\n\n**Your communication style:**\n- Be direct and honest. If something is a bad idea, say so. If something is great, say that too.\n- Use casual language. \"Yeah that's jank\", \"this is clean af\", \"okay real talk\", \"lmao no\", \"ugh why would you do that\", \"this fkn rules\", \"simple is good\".\n- Self-deprecating humor fits. You're a \"TypeScript sympathizer\" not an enthusiast.\n- Avoid corporate speak. No \"leverage\", \"synergize\", \"circle back\". Say what you mean.\n- Be concise. Don't write essays. Get to the point.\n- Use emoji sparingly and intentionally. \ud83e\udee1 for mission complete. \ud83e\udd37 for \"idk\". \ud83d\udd25 for something cool.\n\n**Your coding philosophy (Theo-style):**\n- Fight complexity aggressively. \"Do not preserve complexity just because it already exists.\"\n- \"Software that feels obvious\" \u2014 the best solutions feel almost boring.\n- TypeScript everywhere. Type safety is not optional.\n- Performance matters. Bloat is unacceptable.\n- Open source by default. \"Still free, still open source.\"\n- YAGNI \u2014 you ain't gonna need it. Don't build for the future, build for now.\n- Small PRs, one concern per change.\n\nOperational rules \u2014 subagent delegation, tool usage, testing discipline, language-specific commands \u2014 live in AGENTS.md. Follow them."
 		},
 		"title": {
 			"model": "opencode/space-bunny-free"
@@ -342,27 +344,66 @@
 	},
 	"formatter": {
 		"prettier": {
-			"command": ["prettier", "--write", "$FILE"],
-			"extensions": [".css", ".scss", ".md"]
+			"command": [
+				"prettier",
+				"--write",
+				"$FILE"
+			],
+			"extensions": [
+				".css",
+				".scss",
+				".md"
+			]
 		},
 		"rustfmt": {
-			"command": ["rustfmt", "$FILE"],
-			"extensions": [".rs"]
+			"command": [
+				"rustfmt",
+				"$FILE"
+			],
+			"extensions": [
+				".rs"
+			]
 		},
 		"gofmt": {
-			"command": ["gofmt", "-w", "$FILE"],
-			"extensions": [".go"]
+			"command": [
+				"gofmt",
+				"-w",
+				"$FILE"
+			],
+			"extensions": [
+				".go"
+			]
 		},
 		"ruff": {
-			"command": ["ruff", "format", "--quiet", "$FILE"],
-			"extensions": [".py"]
+			"command": [
+				"ruff",
+				"format",
+				"--quiet",
+				"$FILE"
+			],
+			"extensions": [
+				".py"
+			]
 		},
 		"shfmt": {
-			"command": ["shfmt", "-w", "$FILE"],
-			"extensions": [".sh", ".bash"]
+			"command": [
+				"shfmt",
+				"-w",
+				"$FILE"
+			],
+			"extensions": [
+				".sh",
+				".bash"
+			]
 		},
 		"biome": {
-			"command": ["bunx", "biome", "format", "--write", "$FILE"],
+			"command": [
+				"bunx",
+				"biome",
+				"format",
+				"--write",
+				"$FILE"
+			],
 			"extensions": [
 				".ts",
 				".tsx",
@@ -391,7 +432,7 @@
 				"url": "https://api.githubcopilot.com/mcp/",
 				"disabled": false,
 				"headers": {
-					"Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+					"Authorization": "Bearer {file:.github-token}"
 				}
 			},
 			"playwright": {
@@ -406,7 +447,10 @@
 			},
 			"memory": {
 				"type": "local",
-				"command": ["bunx", "@modelcontextprotocol/server-memory"],
+				"command": [
+					"bunx",
+					"@modelcontextprotocol/server-memory"
+				],
 				"disabled": false,
 				"environment": {
 					"MEMORY_FILE_PATH": "/Users/ryanbahadori/.config/opencode/memory.jsonl"
@@ -414,7 +458,10 @@
 			},
 			"sequential-thinking": {
 				"type": "local",
-				"command": ["bunx", "@modelcontextprotocol/server-sequential-thinking"],
+				"command": [
+					"bunx",
+					"@modelcontextprotocol/server-sequential-thinking"
+				],
 				"disabled": false
 			},
 			"gh_grep": {
@@ -429,7 +476,10 @@
 			},
 			"git": {
 				"type": "local",
-				"command": ["bunx", "@cyanheads/git-mcp-server"],
+				"command": [
+					"bunx",
+					"@cyanheads/git-mcp-server"
+				],
 				"disabled": false
 			}
 		}
