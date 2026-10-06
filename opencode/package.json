@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@opencode-ai/plugin": "^1.17.13",
-    "ecc-universal": "2.2.1"
-  },
-  "overrides": {
-    "js-yaml": "4.3.2"
-  }
-}
