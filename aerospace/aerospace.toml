@@ -1,54 +1,40 @@
 config-version = 2
-after-login-command = []
-# Place a copy of this config to ~/.aerospace.toml
-# After that, you can edit ~/.aerospace.toml to your liking
-
-# It's not necessary to copy all keys to your config.
-# If the key is missing in your config, "default-config.toml" will serve as a fallback
-
-# You can use it to add commands that run after login to macOS user session.
-# 'start-at-login' needs to be 'true' for 'after-login-command' to work
-# Available commands: https://nikitabobko.github.io/AeroSpace/commands
-
-# You can use it to add commands that run after AeroSpace startup.
-# 'after-startup-command' is run after 'after-login-command'
-# Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = []
 
 # Start AeroSpace at login
 start-at-login = true
 
-# Automatically reload the config when it's saved
+# Reload on save, so editing this file is the whole dev loop
 auto-reload-config = true
 
-# Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+# See: https://nikitabobko.github.io/AeroSpace/guide#normalizations
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
 # See: https://nikitabobko.github.io/AeroSpace/guide#layouts
-# The 'accordion-padding' specifies the size of accordion padding
-# You can set 0 to disable the padding feature
 accordion-padding = 30
 
 # Possible values: tiles|accordion
 default-root-container-layout = 'tiles'
 
 # Possible values: horizontal|vertical|auto
-# 'auto' means: wide monitor (anything wider than high) gets horizontal orientation,
-#               tall monitor (anything higher than wide) gets vertical orientation
 default-root-container-orientation = 'auto'
 
-# Possible values: (qwerty|dvorak)
-# See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
+# Possible values: (qwerty|dvorak|colemak)
 key-mapping.preset = 'qwerty'
 
-# Mouse follows focus when focused monitor changes
-# Drop it from your config, if you don't like this behavior
-# See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
-# See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
-# on-focus-changed = "move-mouse window-lazy-center"
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center'] # switchin dislays mouse re center
+# Hyprland feel: focus the window under the cursor, not just under the keys.
+# This is the one behavior change that needs a few days to stop surprising you.
+focus-follows-mouse.enabled = true
 
+# Hyprland moves the mouse with focus. This does it per monitor, lazily, so
+# switching monitors lands the cursor near the windows without a hard jump.
+# Per-window cursor warping is commented out on purpose: it fights
+# focus-follows-mouse and makes text selection fiddly.
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+# on-focus-changed = ['move-mouse window-lazy-center']
+
+# Only config-version 2 can set this list explicitly.
+# S is the scratchpad workspace driven by cmd-alt-s.
 persistent-workspaces = [
     "1",
     "2",
@@ -61,156 +47,151 @@ persistent-workspaces = [
     "F",
     "M",
     "N",
+    "S",
     "T"
 ]
 
-# Gaps between windows (inner-*) and between monitor edges (outer-*).
-# Possible values:
-# - Constant:     gaps.outer.top = 8
-# - Per monitor:  gaps.outer.top = [{ monitor.main = 16 }, { monitor."some-pattern" = 32 }, 24]
-#                 In this example, 24 is a default value when there is no match.
-#                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
-#                 See: https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
-# 43PR rice: mirrors Hyprland gaps_in=3 / gaps_out=5, tuned a touch roomier for macOS shadows.
-# Too cramped? Crank inner.horizontal/vertical and outer.* up (old setup used 14/24).
+# Hyprland gaps_in=10 / gaps_out=20, with one deliberate exception.
+# outer.top stays at 24 so windows clear the macOS menu bar instead of hiding
+# behind it. AeroSpace does not reserve space for the menu bar on its own.
 [gaps]
-# Restored user's original shaping: inner 14/14, outer 24/24/24, per-monitor top
-inner.horizontal = 14
-inner.vertical =   14
-outer.left =       24
-outer.bottom =     24
-outer.right =      24
-outer.top = [{ monitor."M27UP" = 22 }, { monitor."Built-in Retina Display" = 20 }, 24] # no SketchyBar anymore, back to user's original top gap
+inner.horizontal = 10
+inner.vertical =   10
+outer.left =       20
+outer.bottom =     20
+outer.right =      20
+outer.top =        24
 
-
-# 'main' binding mode declaration
-# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
-# 'main' binding mode must be always presented
 [mode.main.binding]
-
-# All possible keys:
-# - Letters.        a, b, c, ..., z
-# - Numbers.        0, 1, 2, ..., 9
-# - Keypad numbers. keypad0, keypad1, keypad2, ..., keypad9
-# - F-keys.         f1, f2, ..., f20
-# - Special keys.   minus, equal, period, comma, slash, backslash, quote, semicolon, backtick,
-#                   leftSquareBracket, rightSquareBracket, space, enter, esc, backspace, tab
-# - Keypad special. keypadClear, keypadDecimalMark, keypadDivide, keypadEnter, keypadEqual,
-#                   keypadMinus, keypadMultiply, keypadPlus
-# - Arrows.         left, down, up, right
-
-# All possible modifiers: cmd, alt, ctrl, shift
-
-# All possible commands: https://nikitabobko.github.io/AeroSpace/commands
-
-# You can uncomment this line to open up terminal with alt + enter shortcut
-# See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
-# alt-enter = 'exec-and-forget open -n /System/Applications/Utilities/Terminal.app'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 alt-slash = 'layout tiles horizontal vertical'
 alt-comma = 'layout accordion horizontal vertical'
 
-# --- 43PR rice: Hyprland Super (cmd) keybinds ---
-# Super+T terminal / Super+D launcher / Super+E file manager / Super+B browser
-# App launchers use cmd+alt (cmd+letter is eaten by apps: cmd-t = new tab, cmd-d = bookmark, etc.)
+# --- Launchers ---
+# Launcher keys are cmd-alt, not cmd, because macOS apps already claim
+# cmd-t (new tab), cmd-d (bookmark), cmd-f (find), cmd-e (export), cmd-b.
 cmd-alt-t = 'exec-and-forget open -a Ghostty'
 cmd-alt-d = 'exec-and-forget open -a Raycast'
 cmd-alt-e = 'exec-and-forget open -a Finder'
 cmd-alt-b = 'exec-and-forget open -a Safari'
-# Super+W wallpaper cycler (hyprquickpaper-lite)
 cmd-alt-w = 'exec-and-forget /Users/ryanbahadori/.config/aerospace/scripts/wallpaper-cycle.sh'
-# Super+Space toggle float - uses cmd-alt-f instead so we don't clobber Spotlight
-cmd-alt-f = 'layout floating tiling'
-# Snap-to-size handled natively: alt-shift-r (resize mode) + alt-shift-minus/equal (smart +/-50)
 
+# --- Window state ---
+# cmd-alt-f is float toggle. macOS owns cmd-f for find, so fullscreen lives on
+# enter instead. Hyprland's $mod+F maps better to enter on a Mac than it does
+# on Linux.
+cmd-alt-f = 'layout floating tiling'
+cmd-alt-enter = 'fullscreen'
+cmd-alt-shift-enter = 'macos-native-fullscreen'
+
+# --- Focus ---
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 alt-h = 'focus left'
 alt-j = 'focus down'
 alt-k = 'focus up'
 alt-l = 'focus right'
 
+# --- Move ---
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 alt-shift-h = 'move left'
 alt-shift-j = 'move down'
 alt-shift-k = 'move up'
 alt-shift-l = 'move right'
 
+# --- Swap ---
+# Hyprland $mod SHIFT + arrow with the swap flag. Focus stays on the same
+# screen slot, which is what makes it feel like rearranging rather than moving.
+cmd-alt-shift-h = 'swap left'
+cmd-alt-shift-j = 'swap down'
+cmd-alt-shift-k = 'swap up'
+cmd-alt-shift-l = 'swap right'
 
+# --- Monitors ---
+# Only one monitor is attached (S27R35x), so these do nothing until you dock.
+# Cheaper than rediscovering them later.
+cmd-alt-shift-left  = 'focus-monitor left'
+cmd-alt-shift-right = 'focus-monitor right'
+cmd-alt-shift-down  = 'focus-monitor down'
+cmd-alt-shift-up    = 'focus-monitor up'
+
+# --- Scratchpad ---
+# summon-workspace pulls S onto whichever monitor has focus. Same shape as
+# Hyprland's togglespecialworkspace.
+cmd-alt-s = 'summon-workspace S'
+
+# --- Resize ---
+# Hyprland resizeactive steps by pixels, usually 10. The 50 steps stay for
+# coarse moves, 10 for fine ones.
+# See: https://nikitabobko.github.io/AeroSpace/commands#resize
+alt-shift-minus  = 'resize smart -50'
+alt-shift-equal  = 'resize smart +50'
+alt-shift-comma  = 'resize smart -10'
+alt-shift-period = 'resize smart +10'
+
+# --- Workspaces ---
+# --auto-back-and-forth mirrors Hyprland's workspace_auto_back_and_forth.
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-# --auto-back-and-forth: pressing the current workspace's key again flips you back
-# to the previous workspace (same as Hyprland's workspace_auto_back_and_forth)
 alt-1 = 'workspace --auto-back-and-forth 1'
 alt-2 = 'workspace --auto-back-and-forth 2'
 alt-3 = 'workspace --auto-back-and-forth 3'
 alt-4 = 'workspace --auto-back-and-forth 4'
 alt-5 = 'workspace --auto-back-and-forth 5'
-# alt-6 = 'workspace 6'
-# alt-7 = 'workspace 7'
 alt-8 = 'workspace --auto-back-and-forth 8'
 alt-9 = 'workspace --auto-back-and-forth 9'
-alt-b = 'workspace --auto-back-and-forth B' # for browser
-# alt-e = 'workspace E' 
-alt-f = 'workspace --auto-back-and-forth F' # for finder
-alt-m = 'workspace --auto-back-and-forth M' #
-alt-n = 'workspace --auto-back-and-forth N' # for notes
-# alt-p = 'workspace P'
-alt-t = 'workspace --auto-back-and-forth T' # for terminal shell
-# alt-v = 'workspace V'
+alt-b = 'workspace --auto-back-and-forth B' # browser
+alt-f = 'workspace --auto-back-and-forth F' # finder
+alt-m = 'workspace --auto-back-and-forth M'
+alt-n = 'workspace --auto-back-and-forth N' # notes
+alt-t = 'workspace --auto-back-and-forth T' # terminal
 
+# Move window to a workspace and stay put, like Hyprland's movetoworkspace
+# without followfocus.
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-shift-1 = 'move-node-to-workspace 1'
 alt-shift-2 = 'move-node-to-workspace 2'
 alt-shift-3 = 'move-node-to-workspace 3'
 alt-shift-4 = 'move-node-to-workspace 4'
 alt-shift-5 = 'move-node-to-workspace 5'
-# alt-shift-6 = 'move-node-to-workspace 6'
-# alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
 alt-shift-b = 'move-node-to-workspace B'
-# alt-shift-e = 'move-node-to-workspace E'
 alt-shift-f = 'move-node-to-workspace F'
 alt-shift-m = 'move-node-to-workspace M'
 alt-shift-n = 'move-node-to-workspace N'
-# alt-shift-p = 'move-node-to-workspace P'
 alt-shift-t = 'move-node-to-workspace T'
-# alt-shift-v = 'move-node-to-workspace V'
-
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
 alt-tab = 'workspace-back-and-forth'
+
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
 alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 alt-shift-semicolon = 'mode service'
-
 alt-shift-r = 'mode resize'
 
+# 'resize' binding mode
+# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.resize.binding]
 # h/l = shrink/grow width, j/k = grow/shrink height
 h = 'resize width -50'
 j = 'resize height +50'
 k = 'resize height -50'
 l = 'resize width +50'
+comma = 'resize smart -10'
+period = 'resize smart +10'
 b = 'balance-sizes'
-
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#resize
-alt-shift-minus = 'resize smart -50'
-alt-shift-equal = 'resize smart +50'
 
 enter = 'mode main'
 esc = 'mode main'
 
-# 'service' binding mode declaration.
+# 'service' binding mode
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]
 esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main'] # reset layout
-#s = ['layout sticky tiling', 'mode main'] # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
-f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
+f = ['layout floating tiling', 'mode main']
 backspace = ['close-all-windows-but-current', 'mode main']
 
 alt-shift-h = ['join-with left', 'mode main']
@@ -218,41 +199,49 @@ alt-shift-j = ['join-with down', 'mode main']
 alt-shift-k = ['join-with up', 'mode main']
 alt-shift-l = ['join-with right', 'mode main']
 
-# Hyprland-style floating rules - windows that should always float
+# Float rules. The `if = 'test ...'` form replaces the soft-deprecated
+# if.app-id / if.app-name-regex-substring keys.
+# Ordering matters: the first matching callback wins unless
+# check-further-callbacks is set.
+# See: https://nikitabobko.github.io/AeroSpace/guide#on-window-detected-callback
+
 [[on-window-detected]]
-if.app-name-regex-substring = 'Shottr'
+if = 'test %{app-name} = Shottr'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.calculator'
+if = 'test %{app-bundle-id} = com.apple.calculator'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.QuickTimePlayerX'
+if = 'test %{app-bundle-id} = com.apple.QuickTimePlayerX'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.systempreferences'
+if = 'test %{app-bundle-id} = com.apple.systempreferences'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.ActivityMonitor'
+if = 'test %{app-bundle-id} = com.apple.ActivityMonitor'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.DiskUtility'
+if = 'test %{app-bundle-id} = com.apple.DiskUtility'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.ColorSyncUtility'
+if = 'test %{app-bundle-id} = com.apple.ColorSyncUtility'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.PhotoBooth'
+if = 'test %{app-bundle-id} = com.apple.PhotoBooth'
 run = 'layout floating'
 
-# Helium always floats (Youtube player overlay, 43PR-style)
+# Helium floats as a whole app. A title match on just the picture-in-picture
+# popup would be tighter, so that the main browser tiles with everything else.
+# I could not confirm the popup window's title, so this stays broad until you
+# check it with:
+#   aerospace list-windows --monitor all --app-bundle-id net.imput.helium
 [[on-window-detected]]
-if.app-name-regex-substring = 'Helium'
+if = 'test %{app-name} = Helium'
 run = 'layout floating'
-
