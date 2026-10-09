@@ -143,10 +143,38 @@ either as intended behaviour, not a fault.
 "unverifiable"` for foreground keystrokes because it cannot read the change
   back. That is not the OS blocking input, so do not "fix" it by switching
   strategy.
-- Permissions live with the _host app_, currently **T3 Code (Nightly)**. Check
-  `peekaboo permissions status`. A different host app needs its own Accessibility
-  and Screen Recording grants, and Peekaboo fails loudly rather than degrading
-  to a weaker path.
+- **TCC attributes permissions to the responsible process, not to peekaboo.**
+  That is the parent of the opencode process, so it changes depending on how
+  opencode was launched. When opencode runs as the Homebrew CLI in a terminal,
+  the responsible app is the terminal (**Ghostty** as of 2026-10-08), _not_
+  T3 Code (Nightly). Granting the wrong app looks like a working fix and is
+  not: `peekaboo permissions` still reports Screen Recording denied while
+  System Settings shows the toggle on for T3 Code. To identify the real
+  responsible app, check `ps -p <opencode_pid> -o pid,ppid,comm` and resolve the
+  parent to a bundle ID, then confirm against the TCC database:
+  `sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "select client, auth_value from access where service='kTCCServiceScreenCapture'"`
+  (`auth_value` 2 means granted). Check `peekaboo permissions` before
+  concluding anything is broken.
+- **The peekaboo MCP server needs `--allow-foreground` or foreground input is
+  dead.** Bare `peekaboo mcp` starts the server with an immutable background-only
+  execution policy, and every foreground request is then refused before dispatch
+  with "Execution policy refused 'click' before dispatch ... a trusted caller
+  must explicitly authorize foreground execution". This is peekaboo's own
+  execution policy, not a macOS permission, so no amount of Screen Recording or
+  Accessibility granting clears it. The fix is the launch command in
+  `~/.config/opencode/opencode.json` under `mcp.servers.peekaboo.command`:
+  `["peekaboo", "mcp", "--allow-foreground"]`. opencode reads MCP launch config
+  once at startup, so editing it mid-session does nothing until opencode
+  restarts; the giveaway that the flag took effect is the tool count rising from
+  24 to 26 as `drag` and `move` become available.
+- A successful foreground `click` returns "Click did not return a confirmed
+  outcome. Follow the canonical escalation metadata before deciding whether to
+  retry." That is the standard unverifiable-foreground path, not a failure, and
+  not a reason to retry blindly, since a second click fires twice. Confirm with
+  a fresh `see` or `inspect_ui` on the target and check the window title or
+  state instead. Verified on this machine: a click that reported exactly that
+  message had in fact navigated System Settings from General to Privacy &
+  Security.
 
 ### maya-mcp (Autodesk Maya 2027)
 
