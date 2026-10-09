@@ -6,6 +6,7 @@ set -l TARGET_DIR "$HOME/.config"
 set -l install_tools false
 set -l generate_completions false
 set -l check_dependencies false
+set -l apply_defaults false
 
 for arg in $argv
     switch $arg
@@ -15,9 +16,11 @@ for arg in $argv
             set generate_completions true
         case --check-dependencies
             set check_dependencies true
+        case --apply-defaults
+            set apply_defaults true
         case '*'
             echo "Unknown option: $arg" >&2
-            echo "Usage: ./install.fish [--install-tools] [--generate-completions] [--check-dependencies]" >&2
+            echo "Usage: ./install.fish [--install-tools] [--generate-completions] [--check-dependencies] [--apply-defaults]" >&2
             exit 2
     end
 end
@@ -75,6 +78,7 @@ set -l configs \
     ghostty \
     git \
     herdr \
+    karabiner \
     mise \
     mole \
     opencode \
@@ -154,6 +158,14 @@ end
 if $failed
     echo "Tool installation failed. Completions were not generated." >&2
     exit 1
+end
+
+if $apply_defaults
+    if test -x "$DOTFILES_DIR/macos/defaults.sh"
+        sh "$DOTFILES_DIR/macos/defaults.sh"; or set failed true
+    else
+        echo "! macos/defaults.sh is not executable, skipping" >&2
+    end
 end
 
 if $generate_completions

@@ -22,6 +22,7 @@ exec fish
 | **git**       | `git/config`               | Aliases, delta diff, signed commits             |
 | **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases              |
 | **herdr**     | `herdr/`                   | Terminal workspace manager and plugins          |
+| **karabiner** | `karabiner/karabiner.json` | Key remapping (Caps Lock as Esc / Ctrl)         |
 | **ghostty**   | `ghostty/config`           | Terminal (default colors, ligatures, splits)    |
 | **mole**      | `mole/`                    | Cleanup lists                                   |
 | **opencode**  | `opencode/`                | Agent, skill, MCP, and formatter configuration  |
@@ -36,6 +37,7 @@ exec fish
 - [fish](https://fishshell.com/) — shell
 - [ghostty](https://ghostty.org/) — terminal
 - [AeroSpace](https://github.com/nikitabobko/AeroSpace) — window manager
+- [Karabiner-Elements](https://karabiner.pqrs.org/) — key remapping
 - [atuin](https://atuin.sh/) — shell history
 - [zoxide](https://github.com/ajeetdsouza/zoxide) — directory jumping
 - [eza](https://github.com/eza-community/eza) — modern ls
@@ -54,6 +56,23 @@ brew install mise fish ghostty atuin zoxide eza neovim
 3. Run `./install.fish --check-dependencies` to check installed tools
 4. Run `./install.fish --install-tools` to install pinned Mise tools
 5. Run `./install.fish --generate-completions` if completions are needed
+6. Run `./install.fish --apply-defaults` to apply the macOS system preferences
+7. Grant Karabiner-Elements Input Monitoring in System Settings > Privacy &
+   Security > Input Monitoring. Without it the key mapping loads but does nothing.
+
+## macOS Preferences
+
+`macos/defaults.sh` holds the system preferences that make macOS behave like a
+Linux workstation: smart quotes, smart dashes and autocorrect off, a 24-hour
+clock, Finder showing file extensions and the path bar, reduced transparency,
+full keyboard access, and an auto-hiding Dock.
+
+The script only writes settings that differ from the macOS factory defaults, is
+safe to re-run, and reports what it changed:
+
+```bash
+./install.fish --apply-defaults   # or: sh macos/defaults.sh
+```
 
 ## Structure
 
@@ -62,10 +81,14 @@ brew install mise fish ghostty atuin zoxide eza neovim
 ├── install.fish          # Bootstrap script
 ├── git/
 ├── ghostty/
+├── karabiner/
+│   └── karabiner.json # Key remapping profile
 ├── fish/
 │   ├── config.fish       # Main config (sources conf.d/*)
 │   ├── conf.d/           # Modular configs
 │   └── functions/        # Custom functions
+├── macos/
+│   └── defaults.sh    # macOS system preferences
 ├── mise/
 ├── nvim/
 │   ├── init.lua          # Entry point
