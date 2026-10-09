@@ -89,30 +89,15 @@ for config in $configs
     check_config $config "$DOTFILES_DIR" "$TARGET_DIR"; or set failed true
 end
 
-# AeroSpace reads this file from the home directory, not from XDG_CONFIG_HOME.
+# AeroSpace reads ${XDG_CONFIG_HOME:-~/.config}/aerospace/aerospace.toml and
+# ~/.aerospace.toml, and calls the config ambiguous when both exist, even when
+# one is a symlink to the other. Keep only the XDG path.
 set -l aerospace_src "$DOTFILES_DIR/aerospace/aerospace.toml"
 set -l aerospace_dst "$HOME/.aerospace.toml"
-if test -e "$aerospace_src"
-    if test -L "$aerospace_dst"
-        set -l current (readlink "$aerospace_dst")
-        if test "$current" = "$aerospace_src"
-            echo "✓ aerospace already linked"
-        else
-            echo "! $aerospace_dst points to $current, expected $aerospace_src" >&2
-            set failed true
-        end
-    else if test -e "$aerospace_dst"
-        echo "! $aerospace_dst exists and is not a symlink" >&2
-        set failed true
-    else
-        if ln -s "$aerospace_src" "$aerospace_dst"
-            echo "✓ Linked aerospace"
-        else
-            echo "✗ Failed to link aerospace" >&2
-            set failed true
-        end
-    end
-else
+if test -e "$aerospace_dst" || test -L "$aerospace_dst"
+    echo "! $aerospace_dst makes the AeroSpace config ambiguous, remove it" >&2
+    set failed true
+else if not test -e "$aerospace_src"
     echo "✗ Missing: $aerospace_src" >&2
     set failed true
 end
