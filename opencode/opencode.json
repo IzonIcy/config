@@ -481,6 +481,35 @@
 					"@cyanheads/git-mcp-server"
 				],
 				"disabled": false
+			},
+			"peekaboo": {
+				"type": "local",
+				"command": [
+					"peekaboo",
+					"mcp"
+				],
+				"enabled": true
+			},
+			"maya": {
+				"type": "local",
+				"command": [
+					"maya-mcp"
+				],
+				"enabled": true,
+				"environment": {
+					"MAYA_MCP_HOST": "localhost",
+					"MAYA_MCP_PORT": "7001",
+					"MAYA_MCP_SCRIPT_DIRS": "/Users/ryanbahadori/.config/opencode/maya-scripts"
+				}
+			},
+			"computer-use": {
+				"type": "local",
+				"command": [
+					"node",
+					"/Users/ryanbahadori/.config/opencode/mcp/computer-use/dist/index.js"
+				],
+				"disabled": false,
+				"environment": {}
 			}
 		}
 	},

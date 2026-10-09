@@ -21,6 +21,11 @@ opencode/auth.json
 # Personal agent memory
 opencode/memory.jsonl
 
+# Agent-generated Maya scripts. These are throwaway scene-build helpers that
+# maya-mcp executes as this user, so a plain `git add -A` would push executable
+# scratch files to the remote.
+opencode/maya-scripts/
+
 
 
 # Logs & app session state
