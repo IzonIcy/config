@@ -117,6 +117,35 @@ else
     set failed true
 end
 
+# zsh reads its config from the home directory, not from XDG_CONFIG_HOME, so it
+# needs the same explicit link AeroSpace does above.
+set -l zshrc_src "$DOTFILES_DIR/zsh/.zshrc"
+set -l zshrc_dst "$HOME/.zshrc"
+if test -e "$zshrc_src"
+    if test -L "$zshrc_dst"
+        set -l current (readlink "$zshrc_dst")
+        if test "$current" = "$zshrc_src"
+            echo "✓ zshrc already linked"
+        else
+            echo "! $zshrc_dst points to $current, expected $zshrc_src" >&2
+            set failed true
+        end
+    else if test -e "$zshrc_dst"
+        echo "! $zshrc_dst exists and is not a symlink" >&2
+        set failed true
+    else
+        if ln -s "$zshrc_src" "$zshrc_dst"
+            echo "✓ Linked zshrc"
+        else
+            echo "✗ Failed to link zshrc" >&2
+            set failed true
+        end
+    end
+else
+    echo "✗ Missing: $zshrc_src" >&2
+    set failed true
+end
+
 if $failed
     echo "Configuration check failed. No tools or completions were changed." >&2
     exit 1
