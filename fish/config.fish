@@ -45,12 +45,15 @@ if status is-interactive
     abbr --add --global gl 'git log --oneline --graph'
     abbr --add --global gp 'git push'
     abbr --add --global gpl 'git pull'
-    abbr --add --global gc 'git commit -m'
+    # 'gc' is defined in conf.d/30-aliases.fish alongside the other aliases ported
+    # from the zsh setup, so it is not repeated here.
 
     # Docker compose
     abbr --add --global dc 'docker compose'
 
-    # Fastfetch on shell start
+    # Fastfetch greeting. Note this only runs on a new terminal, not on every
+    # shell start, so an `exec fish` inside an existing tab shows nothing. The
+    # prompt itself is fish's default.
     function fish_greeting
         if command -q fastfetch
             fastfetch
