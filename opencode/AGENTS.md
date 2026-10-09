@@ -35,6 +35,207 @@ When uncertain, prefer: Tailwind, TypeScript, Bun, React, Convex, Clerk, Vercel.
 - For computer-use verification: shell out to external tool if helpful.
 - If a rule here fights the task in front of you, say so loudly and get a human sign-off before breaking it.
 
+## Mac Control
+
+Two MCPs give this machine full desktop and Maya control. Use them; do not
+rebuild equivalents. Peekaboo covers the desktop, maya-mcp covers Maya.
+
+### peekaboo (desktop GUI automation)
+
+Screenshot, click, type, scroll, drag, hotkeys, and the accessibility tree.
+Peekaboo reads the accessibility tree, so it hands back element IDs rather than
+coordinates. Observe first, then act on the IDs it returns. Never guess
+coordinates from a screenshot when an element ID exists.
+
+The 24 MCP tools: `action`, `agent`, `analyze`, `app`, `browser`, `capture`,
+`click`, `clipboard`, `dialog`, `dock`, `image`, `inspect_ui`, `menu`, `paste`,
+`permissions`, `press`, `scroll`, `see`, `set_value`, `sleep`, `space`, `type`,
+`verify_state`, `window`.
+
+- Observe with `see` or `inspect_ui` (both return element IDs), `image` for a
+  plain screenshot, `verify_state` to assert an expected UI state afterwards.
+  CLI subcommands use hyphens (`set-value`, `verify-state`); MCP names are
+  underscored. Note `peekaboo image` was **removed in v4** on the CLI, use
+  `peekaboo see --no-elements`.
+- `action` (CLI: `peekaboo action`) invokes a named accessibility action such as
+  `AXPress`. `set_value` writes a settable accessibility value directly.
+- **The MCP schemas do not match the CLI flags.** Over MCP, `see` takes
+  `app_target` rather than `app`, and `type` takes only a `snapshot` plus the
+  text, because the snapshot already determines the target. There is no `app`
+  or `window_id` on the MCP `type` tool. Check `tools/list` before assuming a
+  flag carries over.
+- `click`/`type` default to **background** delivery when a target is
+  `--app`/`--pid`/`--window-id` is resolvable, so the app does not steal focus
+  from the user. Cold launches and ambiguous targets need `--foreground`.
+- Peekaboo refuses to act when it cannot attest an exact target, and says why.
+  That refusal is a feature. Read the refusal, observe again, disambiguate by
+  window-id. Do not retry the same ambiguous call in a loop.
+
+#### Known Peekaboo 4.5.0 bugs that bite this workflow
+
+These are unfixed upstream in 4.5.0 and the project cannot be rebuilt on this
+machine (no full Xcode). Work around them. Do not report them as tool failures.
+
+**`type` can report failure when it actually succeeded. Never blind-retry it.**
+A plain `type --app X --window-id N` exits 1 with "Typing did not return an
+accepted outcome", or "Action outcome is indeterminate / Typing failed after
+foreground setup may have changed focus", while the text is in fact present.
+That is a false negative, not a failure. Its own hint ("observe the target
+before retrying") is right: **observe before retrying.** Run `see` on the window
+and check for your marker string. If it is there, the type worked. Retrying
+without checking is how you end up with the string typed twice.
+
+Prefer the form that does report correctly: `--snapshot "$SNAP"` together with
+`--clear` returns "Typing confirmed" and exit 0. Over MCP, `type` already
+requires a `snapshot` and nothing else, so the snapshot fully determines the
+target and the MCP path is safer than the bare CLI. Verified over MCP: `see`
+with `app_target` then `type` with that snapshot returns `isError: false` and
+"[ok] Cleared field, Typed: ..." with the text present in the tree.
+
+House style for the rest of the tool is exit 0 plus "dispatched but not
+verified". Only the typing path hard-fails. `press` and `click` degrade
+correctly.
+
+**Element IDs are snapshot-scoped and must never be reused.** `elem_N` is
+positional, so any tree change permutes them across calls, and a stale
+`click --on elem_44` re-resolves against the current tree and can silently hit a
+different control. Measured on this machine: two back-to-back `see` calls drifted
+from 41 to 42 elements and `elem_36`/`elem_37` swapped role. Passing a _stale_
+`snapshot` does not protect you either, it is accepted and re-resolved loosely.
+Capture a fresh `see` and pass that same call's `--snapshot` on every action.
+Reusing one snapshot across several actions is fine and does stay pinned.
+
+**`verify_state --on` does not accept `elem_N`.** It resolves the AX identifier
+field only (for example `--on "First Text View"`), and it has no `--snapshot`
+flag, so it re-derives its own tree. A `see` element ID passed to `verify_state`
+fails with "No element matches identifier=elem_N". To verify an element, query it
+by its accessible label, not its snapshot ID.
+
+**`verify_state --window-exists` without a window selector can return `unknown`.**
+With `--app X` alone it may burn the full timeout and answer "Verification
+unknown / Window enumeration was incomplete" because accessibility window
+enrichment dropped a row. This is reproducible on Finder and not on TextEdit, so
+do not rely on it either way. Pass `--window-id` or `--pid` for a deterministic
+answer; both are instant and both work, as does bundle-ID targeting.
+
+**Clipboard slots work on this machine. Do not avoid them.** `clipboard save
+--slot NAME` and `clipboard restore --slot NAME` round-trip correctly, including
+two interleaved slots and across a Peekaboo daemon restart. `set`/`get` fidelity
+is byte-exact including UTF-8. A report that slots "persist nothing" did not
+reproduce here on macOS 27.2; if you ever see it fail, check the actual error
+rather than assuming the feature is broken.
+
+**Background `scroll` can fail on receipt validation.** It may report "Bridge
+operation receipt does not match canonical target attribution" even though host
+and client builds match. Pass an explicit `--snapshot`; that makes it either
+work or refuse cleanly. Note background scroll also needs an AX-scrollable
+element, which a plain text area is not.
+
+That receipt error did not reproduce on this machine; what a plain text area
+actually returns is a correct refusal: "Background scroll requires --on with an
+Accessibility-scrollable element" or "Background scroll is Accessibility-only,
+but Accessibility action is not supported". Both name a real remedy. Treat
+either as intended behaviour, not a fault.
+
+- Disambiguate multi-window apps with `window list --app X` and the `window_id`.
+- Keyboard input works on this machine (macOS 27.2). Peekaboo usually delivers
+  it through the accessibility value setter, and reports `effect:
+"unverifiable"` for foreground keystrokes because it cannot read the change
+  back. That is not the OS blocking input, so do not "fix" it by switching
+  strategy.
+- Permissions live with the _host app_, currently **T3 Code (Nightly)**. Check
+  `peekaboo permissions status`. A different host app needs its own Accessibility
+  and Screen Recording grants, and Peekaboo fails loudly rather than degrading
+  to a weaker path.
+
+### maya-mcp (Autodesk Maya 2027)
+
+71 typed tools. Talks to Maya over `commandPort` on `127.0.0.1:7001`, opened
+automatically at startup by `userSetup.py` in Maya's scripts dir. Loopback only,
+with no authentication on the socket, so treat local access as equivalent to
+running code as the user.
+
+Standard flow: `maya.connect` -> `health.check` -> `scene.info` -> act ->
+`scene.save_as`. **Verify visually** with `viewport.capture` and actually look at
+the returned image before claiming success.
+
+Launching Maya is the agent's job, not the user's: `open -a
+/Applications/Autodesk/maya2027/Maya.app` from the shell, then poll until
+`127.0.0.1:7001` accepts a connection. `userSetup.py` opens the port and kills
+the Home Screen on startup, so roughly 10-20 seconds after launch Maya is ready
+with no GUI interaction needed.
+
+- Prefer typed tools (`modeling.*`, `nodes.*`, `shading.*`) for discrete
+  operations. Use `script.execute` for anything multi-step. Scripts must live
+  in `~/.config/opencode/maya-scripts/`, set via `MAYA_MCP_SCRIPT_DIRS`; any
+  other path is rejected. With that env var unset you get `script.list`
+  returning nothing and `script.execute` failing with "No script directories
+  configured", which reads like a broken install but is just a missing var.
+- `script.run` (arbitrary code) is disabled and should stay that way. Note this
+  is not a strong boundary: the agent can write into the allowlisted directory,
+  so `script.execute` can already run arbitrary code as the user.
+- **Maya 2027 API traps, verified on this machine:**
+  - `cmds.rotate` requires keyword args, e.g. `cmds.rotate(n, rotateY=-90)`.
+    Positional raises `TypeError: Object 0 is invalid`.
+  - `cmds.lookAt`, `cmds.fitView`, `cmds.getActivePanel` do not exist.
+  - `cmds.dgdirty(all=True)` is invalid, use bare `cmds.dgdirty()`.
+  - `modelPanel(..., shadingType=)` and `(..., grid=)` are invalid flags.
+  - Do not rely on `viewFit` to frame geometry. Panel/view resolution from the
+    commandPort context is unreliable and several of its flags are invalid.
+    Set the camera transform directly instead. A camera looks down its local -Z;
+    with default xyz rotate order that means
+    `rotateX = asin(dy)`, `rotateY = atan2(-dx, -dz)`.
+  - Call `cmds.refresh(force=True)` after camera moves. `viewport.capture` reads
+    the panel image buffer, so without a redraw it returns a stale frame.
+  - `viewport.capture` picks a panel in this order: the caller's `panel`
+    argument, then `cmds.getPanel(withFocus=True)`, then the first visible
+    panel, then `sorted(names)[0]`. `userSetup.py` focuses the persp viewport
+    at startup and `frame_view.py` re-focuses it, so a capture with no `panel`
+    argument now comes back in perspective. Passing `panel` explicitly is still
+    the safer habit if focus has since moved.
+- **Maya launches straight into a live viewport.** `userSetup.py` disables the
+  Home Screen, which otherwise replaces the main window with a launcher and
+  leaves no viewport at all. If you see a window titled just "AUTODESK MAYA
+  2027" with no `Autodesk MAYA` in the title bar, that is the Home Screen and
+  `viewport.capture` will return a meaningless grid. Dismiss it via peekaboo.
+- Write scripts to be **idempotent**. They get run repeatedly in one session
+  while an agent iterates. Delete prior geometry up front, or the second run
+  silently doubles every count. Keep shading nodes and transforms on distinct
+  name stems: a blinn node and a transform both named `shipHull` makes Maya
+  uniquify the transform to `shipHull1`, which then defeats a cleanup pass that
+  looks for `shipHull`. Namespace materials (`matHull`) separately.
+- Never let a script swallow exceptions. Collect failures and surface them in
+  the result so a partial failure cannot be reported as success.
+
+### Driving chat and message composers
+
+Rule learned from Codex's computer-use app playbooks, and it applies anywhere an
+agent types into a UI that has a default-button action: Slack, Discord, Mail,
+Messages, iMessage, a search field, anything with a Send button.
+
+- **Prefer `set_value` over `type` for message composers.** With a newline in
+  the string, `set_value` inserts a line break, while `type` can send the
+  message instead. One stray newline and the agent has posted to a channel or
+  emailed a human.
+- **Never send text containing `\n` through `type` in any composer.** Strip new
+  lines, or switch to `set_value`, or type line by line.
+- **Make sure the intended field is focused before pressing Return.** A
+  composer with nothing focused swallows the keystroke somewhere else, or the
+  Return lands on whatever was frontmost.
+- **Treat a screenshot as the source of truth when the accessibility tree looks
+  wrong.** Some app UIs report stale or misleading AX text.
+- In spreadsheet apps, one click appends to a cell and three clicks replace its
+  contents, and batching several rows or several formulas into a single type
+  call fails. Click to select, then type the value.
+
+### Combining both
+
+Maya's viewport is a 3D canvas with no useful accessibility tree. Use the API
+for geometry and peekaboo for anything visual or interactive: peekaboo to
+confirm the Maya window is real and framed correctly, the API to build, then
+`viewport.capture` to verify the result. When a capture and the API disagree,
+trust the API for existence and the capture for appearance, and investigate.
+
 ---
 
 # Universal Agent Guidelines
@@ -191,6 +392,7 @@ Removing tells is half the job. Sterile writing is as obvious as slop.
 ### The tells
 
 Content:
+
 - Puffery: pivotal, testament to, evolving landscape, setting the stage for, indelible mark, deeply rooted. State what happened.
 - Name-dropping outlets with no context. Pick one, say what was said.
 - Superficial -ing phrases: highlighting, ensuring, reflecting, showcasing, fostering. Delete or expand with a real source.
@@ -199,6 +401,7 @@ Content:
 - Formulaic challenges: "Despite challenges... continues to thrive". Use specific facts.
 
 Language:
+
 - AI vocabulary: additionally, crucial, delve, enduring, enhance, garner, interplay, intricate, pivotal, underscore, vibrant. Plain words.
 - Fancy ways to say "is": serves as, stands as, boasts, features. Just say is or has.
 - "Not just X, but Y." State the point directly. If Y is what matters, say only Y.
@@ -207,6 +410,7 @@ Language:
 - False ranges: "from X to Y" where neither end is on a meaningful scale. List topics.
 
 Style:
+
 - Em dashes. Never. Use periods or commas. Do not substitute parentheses, en dashes, or hyphen-as-dash; those are the same tell.
 - Colons. Fine before a list, a definition you're introducing, or a line of code. Not as mid-sentence connectors.
 - Comparison framing: "Instead of X, you do Y" and "whereas X does Y". The parallel is the tell, not the punctuation. State only what you're recommending.
@@ -217,22 +421,27 @@ Style:
 - Curly quotes. Use straight quotes.
 
 Chat artifacts:
+
 - "I hope this helps!", "Let me know if...", "Of course!", "Certainly!", "Found the smoking gun!". Remove.
 - Cutoff disclaimers: "While specific details are limited...". Find sources or remove.
 - Sycophancy: "Great question! You're absolutely right!". Respond directly.
 
 Filler:
+
 - "In order to" is "to". "Due to the fact that" is "Because". "It is important to note that" gets deleted.
 - Hedging stacks: "could potentially possibly be argued that it might" is "may".
 - Generic conclusions: "The future looks bright." State specific plans or facts.
 
 Jargon, always:
+
 - substrate, wedge, nexus, vantage, locus, gold-plating, endgame, north star, flywheel, ratchet. Read as technical, usually have a plainer word. "Substrate" becomes "base". "Wedge in" becomes "add". "Gold-plating" becomes "more than the job needs".
 
 Jargon, technical writing only:
+
 - harness, scaffolding, vector, modality, primitive, surface, evacuate, bedrock, paradigm. Fine in an internal engineering doc, wrong elsewhere. "Evacuate the handler" becomes "move the handler out".
 
 Plain speech:
+
 - Say what it does, not how it feels. "The database stays close at hand" names a feeling. Name the mechanism or a number: `.toSQL()` returns the exact string sent to the database. If you can't restate it as an instruction, fact, or number, cut it. If it could appear unchanged in another project's docs, it says nothing about this one.
 - Shorten or split dense sentences. One idea per sentence.
 - Active voice. Name the actor: "queries are validated" becomes "the compiler validates queries".
