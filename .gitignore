@@ -49,8 +49,11 @@ raycast/config.json
 raycast/*-endpoint.json
 !raycast/*-endpoint.example.json
 
-# Editor backups
+# Editor and agent backups. The second pattern catches the
+# name-anything-bak-suffix style that agents use when they rewrite a config in
+# place, which *.bak alone misses.
 *.bak
+*.bak-*
 
 # Generated fish completions
 fish/completions/
