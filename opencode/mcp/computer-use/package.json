@@ -1,0 +1,23 @@
+{
+	"name": "opencode-computer-use-mcp",
+	"version": "1.0.0",
+	"description": "MCP server that lets opencode control macOS: screenshots, mouse, keyboard, accessibility tree, app/window management",
+	"type": "module",
+	"bin": {
+		"opencode-computer-use-mcp": "dist/index.js"
+	},
+	"scripts": {
+		"build:sdk": "mkdir -p bin && swiftc swift/ComputerUse.swift -o bin/computeruse -O -framework ApplicationServices -framework CoreGraphics -framework AppKit",
+		"build": "npm run build:sdk && tsc",
+		"start": "node dist/index.js",
+		"test": "node scripts/test-mcp.mjs"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.12.0",
+		"zod": "^3.24.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0",
+		"typescript": "^5.7.0"
+	}
+}
