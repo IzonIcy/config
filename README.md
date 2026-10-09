@@ -30,11 +30,13 @@ exec fish
 | **fish**      | `fish/config.fish`         | Shell (atuin, zoxide, eza, mise, abbreviations) |
 | **mise**      | `mise/config.toml`         | Tool versions (node, bun, rust, python)         |
 | **nvim**      | `nvim/`                    | Separately owned Neovim configuration           |
+| **zsh**       | `zsh/.zshrc`               | Login shell (p10k, fzf, atuin, zoxide, mise)    |
 
 ## Requirements
 
 - [mise](https://mise.jdx.dev/) — tool version manager
 - [fish](https://fishshell.com/) — shell
+- [zsh](https://www.zsh.org/) — login shell
 - [ghostty](https://ghostty.org/) — terminal
 - [AeroSpace](https://github.com/nikitabobko/AeroSpace) — window manager
 - [Karabiner-Elements](https://karabiner.pqrs.org/) — key remapping
@@ -46,7 +48,7 @@ exec fish
 Install via Homebrew:
 
 ```bash
-brew install mise fish ghostty atuin zoxide eza neovim
+brew install mise fish zsh ghostty atuin zoxide eza neovim
 ```
 
 ## Post-Install
@@ -95,13 +97,30 @@ safe to re-run, and reports what it changed:
 │   └── lua/
 │       ├── config/       # Core config (options, mappings, theme)
 │       └── plugins/      # Plugin specs
+├── zsh/
+│   └── .zshrc            # Login shell config
 └── ...
 ```
 
 This repository is the live `~/.config` directory. The installer checks the
-configuration directories in place and links AeroSpace to
-`~/.aerospace.toml`. Runtime state, caches, and generated completions are not
-source configuration.
+configuration directories in place, links AeroSpace to `~/.aerospace.toml`, and
+links `zsh/.zshrc` to `~/.zshrc`, since both tools read their config from the
+home directory rather than XDG_CONFIG_HOME. Runtime state, caches, and generated
+completions are not source configuration.
+
+## Two Shells
+
+zsh is the login shell and holds the Powerlevel10k prompt, fzf keybindings,
+atuin, zoxide, and mise. fish is configured in `fish/config.fish` plus four
+modules in `fish/conf.d/`, and is what `exec fish` gives you.
+
+fish sources `conf.d` before `config.fish`, so the numbering on the modules
+controls load order. `90-keybindings.fish` is last on purpose: the vi preset
+owns the final binding state that way. atuin initializes in `config.fish` and so
+takes ctrl-r; fzf keeps ctrl-t for files and alt-c for directories.
+
+Aliases live in `conf.d/30-aliases.fish` as `abbr` rather than `alias`, because
+fish aliases cannot contain spaces in the expansion.
 
 ## Fish Startup Timer
 
