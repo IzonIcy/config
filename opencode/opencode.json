@@ -5,9 +5,7 @@
 	"snapshots": true,
 	"update": "disable",
 	"lsp": true,
-	"instructions": [
-		"AGENTS.md"
-	],
+	"instructions": ["AGENTS.md"],
 	"permissions": [
 		{
 			"action": "read",
@@ -344,66 +342,27 @@
 	},
 	"formatter": {
 		"prettier": {
-			"command": [
-				"prettier",
-				"--write",
-				"$FILE"
-			],
-			"extensions": [
-				".css",
-				".scss",
-				".md"
-			]
+			"command": ["prettier", "--write", "$FILE"],
+			"extensions": [".css", ".scss", ".md"]
 		},
 		"rustfmt": {
-			"command": [
-				"rustfmt",
-				"$FILE"
-			],
-			"extensions": [
-				".rs"
-			]
+			"command": ["rustfmt", "$FILE"],
+			"extensions": [".rs"]
 		},
 		"gofmt": {
-			"command": [
-				"gofmt",
-				"-w",
-				"$FILE"
-			],
-			"extensions": [
-				".go"
-			]
+			"command": ["gofmt", "-w", "$FILE"],
+			"extensions": [".go"]
 		},
 		"ruff": {
-			"command": [
-				"ruff",
-				"format",
-				"--quiet",
-				"$FILE"
-			],
-			"extensions": [
-				".py"
-			]
+			"command": ["ruff", "format", "--quiet", "$FILE"],
+			"extensions": [".py"]
 		},
 		"shfmt": {
-			"command": [
-				"shfmt",
-				"-w",
-				"$FILE"
-			],
-			"extensions": [
-				".sh",
-				".bash"
-			]
+			"command": ["shfmt", "-w", "$FILE"],
+			"extensions": [".sh", ".bash"]
 		},
 		"biome": {
-			"command": [
-				"bunx",
-				"biome",
-				"format",
-				"--write",
-				"$FILE"
-			],
+			"command": ["bunx", "biome", "format", "--write", "$FILE"],
 			"extensions": [
 				".ts",
 				".tsx",
@@ -447,10 +406,7 @@
 			},
 			"memory": {
 				"type": "local",
-				"command": [
-					"bunx",
-					"@modelcontextprotocol/server-memory"
-				],
+				"command": ["bunx", "@modelcontextprotocol/server-memory"],
 				"disabled": false,
 				"environment": {
 					"MEMORY_FILE_PATH": "/Users/ryanbahadori/.config/opencode/memory.jsonl"
@@ -458,10 +414,7 @@
 			},
 			"sequential-thinking": {
 				"type": "local",
-				"command": [
-					"bunx",
-					"@modelcontextprotocol/server-sequential-thinking"
-				],
+				"command": ["bunx", "@modelcontextprotocol/server-sequential-thinking"],
 				"disabled": false
 			},
 			"gh_grep": {
@@ -476,25 +429,17 @@
 			},
 			"git": {
 				"type": "local",
-				"command": [
-					"bunx",
-					"@cyanheads/git-mcp-server"
-				],
+				"command": ["bunx", "@cyanheads/git-mcp-server"],
 				"disabled": false
 			},
 			"peekaboo": {
 				"type": "local",
-				"command": [
-					"peekaboo",
-					"mcp"
-				],
+				"command": ["peekaboo", "mcp", "--allow-foreground"],
 				"enabled": true
 			},
 			"maya": {
 				"type": "local",
-				"command": [
-					"maya-mcp"
-				],
+				"command": ["maya-mcp"],
 				"enabled": true,
 				"environment": {
 					"MAYA_MCP_HOST": "localhost",
