@@ -31,6 +31,10 @@ opencode/maya-scripts/
 # Logs & app session state
 *.log
 herdr/session.json
+# Session snapshots are regenerated on launch and the agent socket is a symlink
+# into a per-boot launchd dir, so it dangles whenever herdr isn't running.
+herdr/session-snapshots/
+herdr/*.sock*
 
 # Spicetify downloaded artifacts (marketplace installs)
 spicetify/CustomApps/marketplace*

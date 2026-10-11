@@ -105,5 +105,6 @@ fpath=(~/.grok/completions/zsh $fpath)
 
 
 
-# Vite+ bin (https://viteplus.dev)
-. "/Users/ryanbahadori/.config/vite-plus/env"
+# Vite+ bin (https://viteplus.dev). vite-plus/ is gitignored, so a fresh clone
+# has no env file and sourcing it unconditionally errors on every shell.
+[[ ! -f "$HOME/.config/vite-plus/env" ]] || source "$HOME/.config/vite-plus/env"
