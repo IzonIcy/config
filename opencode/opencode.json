@@ -203,6 +203,11 @@
 			"effect": "allow"
 		},
 		{
+			"action": "chrome-devtools_*",
+			"resource": "*",
+			"effect": "ask"
+		},
+		{
 			"action": "memory_*",
 			"resource": "*",
 			"effect": "allow"
