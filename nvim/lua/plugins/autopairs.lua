@@ -16,6 +16,8 @@ require('nvim-autopairs').setup({
     map_c_w = false, -- map <c-w> to delete a pair if possible
     -- FTerm floats set a filetype, so autopairs' "float with no filetype"
     -- guard never fires and bracket completion eats every paren and quote
-    -- you type into a terminal (htop, and the Claude prompt box).
-    disable_filetype = { 'TelescopePrompt', 'spectre_panel', 'snacks_picker_input', 'fterm_htop', 'fterm_claude' },
+    -- you type into a terminal. Two filetypes are live: 'fterm_htop' for the
+    -- :Htop instance, and 'FTerm' (FTerm's own default) for <leader>z.
+    -- autopairs matches these by exact string, so one does not cover the other.
+    disable_filetype = { 'TelescopePrompt', 'spectre_panel', 'snacks_picker_input', 'fterm_htop', 'FTerm' },
 })
