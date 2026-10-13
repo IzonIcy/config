@@ -8,6 +8,7 @@
 *.sqlite*
 
 # Secrets / machine-local auth
+github-mcp-token
 gh/hosts.yml
 fish/fish_variables
 fish/conf.d/secrets.fish
