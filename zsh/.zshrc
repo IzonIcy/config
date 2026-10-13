@@ -91,9 +91,13 @@ export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border"
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
 export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
 
-# GitHub token for MCP servers
-if command -v gh &>/dev/null; then
-  export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token 2>/dev/null)
+# GitHub token for MCP servers. Fallback only: ~/.config/github-mcp-token is
+# sourced further down and wins. Never export an empty value, that produces a
+# confusing 401 instead of a clear "not configured".
+if [[ -z ${GITHUB_PERSONAL_ACCESS_TOKEN:-} ]] && command -v gh &>/dev/null; then
+  _gh_token=$(gh auth token 2>/dev/null)
+  [[ -n $_gh_token ]] && export GITHUB_PERSONAL_ACCESS_TOKEN="$_gh_token"
+  unset _gh_token
 fi
 
 # Bun completions
@@ -103,8 +107,9 @@ export PATH="$HOME/.grok/bin:$PATH"
 fpath=(~/.grok/completions/zsh $fpath)
 # <<< grok installer <<<
 
-
-
 # Vite+ bin (https://viteplus.dev). vite-plus/ is gitignored, so a fresh clone
 # has no env file and sourcing it unconditionally errors on every shell.
 [[ ! -f "$HOME/.config/vite-plus/env" ]] || source "$HOME/.config/vite-plus/env"
+
+# GitHub MCP token (mode 600, separate so it isn't world-readable in .zshrc)
+[ -f "$HOME/.config/github-mcp-token" ] && source "$HOME/.config/github-mcp-token"
