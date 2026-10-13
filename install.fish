@@ -72,6 +72,7 @@ end
 set -l configs \
     atuin \
     btop \
+    cava \
     fastfetch \
     fish \
     gh \

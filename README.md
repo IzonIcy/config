@@ -18,6 +18,7 @@ exec fish
 | **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings    |
 | **atuin**     | `atuin/`                   | Shell history                                   |
 | **btop**      | `btop/`                    | System monitor and themes                       |
+| **cava**      | `cava/`                    | Audio visualizer and GLSL shaders               |
 | **fastfetch** | `fastfetch/`               | Shell greeting and system summary               |
 | **git**       | `git/config`               | Aliases, delta diff, signed commits             |
 | **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases              |
