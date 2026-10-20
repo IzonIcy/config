@@ -35,10 +35,24 @@ When uncertain, prefer: Tailwind, TypeScript, Bun, React, Convex, Clerk, Vercel.
 - For computer-use verification: shell out to external tool if helpful.
 - If a rule here fights the task in front of you, say so loudly and get a human sign-off before breaking it.
 
+## Shared Config Files
+
+`~/.config/opencode/opencode.json` is read by every session on this machine, and opencode re-reads
+it on each write. Each intermediate save is live for all of them, so a 90 second mistake takes the
+whole MCP layer down at once.
+
+- Edit JSON with a JSON tool: `jq` for one value, `python3 -c` with `json.load` / `json.dump` for
+  structure. Write to a temp file and `mv` it into place, so no reader sees a partial document.
+- Reach for `sed` on JSON with the specific failure in mind: `sed -i '' 's/,$//'` on a 500 line
+  config strips a comma from every line, leaving a file that parses as neither JSON nor JSONC.
+- Validate and inspect before calling it done: `python3 -m json.tool <file>`, then `git diff` in
+  `~/.config` (dotfiles repo) to see exactly what moved.
+
 ## Mac Control
 
-Two MCPs give this machine full desktop and Maya control. Use them; do not
-rebuild equivalents. Peekaboo covers the desktop, maya-mcp covers Maya.
+Three MCPs give this machine full desktop and Maya control. Use them; do not
+rebuild equivalents. Peekaboo covers the desktop, `computer-use` adds real
+desktop input with vision and the accessibility tree, and maya-mcp covers Maya.
 
 ### peekaboo (desktop GUI automation)
 
@@ -235,6 +249,123 @@ with no GUI interaction needed.
 - Never let a script swallow exceptions. Collect failures and surface them in
   the result so a partial failure cannot be reported as success.
 
+### Driving Maya's GUI with computer-use
+
+`computer-use` is the third MCP and the only one that gives real desktop input: screenshots for
+seeing, the accessibility tree for targeting, clicks and keystrokes for acting. Maya's Qt UI is a
+good target with specific holes. Read it with `read_screen({app: "Maya", max: 4000})`; at a 935x1035
+window with the default layout that returned the entire tree, 606 nodes and 218 with labels, and
+`truncated: false`.
+
+- The panels are real. 122 `AXButton`, 160 `AXMenuItem`, 12 `AXTextField`, 165 `AXImage`, and
+  `looksOpaque: false` with `contentNodes: 264`. The timeline, outliner, channel box and panel tabs
+  come back with usable frames, for example `AXButton "openSceneButton" @1123,81 22x22`. The 3D
+  viewport itself has no useful tree; everything around it does.
+- Trust those frames for the panels, not for the viewport toolbar row. Probing four elements at
+  their own reported centres with `element_at`, `Go to end of playback range`, `Play forwards` and
+  the `Attribute Editor` tab each resolved to themselves, while the viewport panel toolbar row
+  reported `y=201` and that point resolved to `AXMenuItem "Edit"`. Check with `element_at` before
+  clicking anything in that row.
+- The File row is pixels only. File, Edit, Create, Select, Modify, Display, Windows, Mesh, Edit Mesh
+  and Mesh Tools are custom drawn. They are absent from the tree, and the macOS system menu bar
+  exposes only zero size Apple/Maya/Window entries, so `computer_menu` and System Events cannot
+  reach them at all. Click them by coordinate.
+- Re-screenshot after every step inside a menu. Aiming at Create > Polygon Primitives using the
+  coordinate read off the parent menu hit NURBS Primitives instead, because the list moves when a
+  submenu opens. The click did what it was told; the coordinate had gone stale by one row, and the
+  result was a NURBS sphere rather than a polygon one.
+- A menu click is a real scene edit and the API confirms it. Create > a primitive flipped
+  `scene_info.modified` from false to true, added `nurbsSphere1`, `nurbsSphereShape1` and
+  `makeNurbSphere1` to `nodes_list`, and showed the selected sphere in both a screenshot and
+  `viewport_capture`. Make that pair the verification step for anything done through the GUI.
+- The Open dialog is Maya's own Qt browser, not a native panel, and it is fully AX exposed. The
+  `Files` outline, `File name:` field, `Open` and `Cancel` all matched the pixels. The toolbar
+  `openSceneButton` opens it directly. With a dirty scene it first asks "Warning: Scene Not Saved /
+  Save changes to <scene>?" with Save, Don't Save and Cancel; after Don't Save the browser did not
+  appear, so treat that prompt as ending the Open and start again from a clean scene.
+- Put the file where the dialog already is rather than typing a path. Copying a folder into
+  `~/Documents/maya/projects/default/scenes/` made it appear in the dialog list with no navigation
+  at all. Typing into the `Look in` field is unverified on this machine.
+- `computer_key` takes `mod`, and `modifiers` is now an accepted alias for it. Passing both with
+  different values is an error rather than a silent pick. The result echoes the modifiers that
+  reached the CLI, so `modifiers: ["shift"]` is proof the value parsed and `[]` means it did not.
+- Use the API for values and the GUI for what the API cannot reach. Clicking a Channel Box field and
+  typing into it means trusting focus; `attributes_set` and `modeling_*` do not.
+
+**The file round trip is the one link not proven end to end** (as of Oct 18: open a real scene
+through the dialog, edit it by clicking, save it back). Everything else in this section was checked
+against a live Maya. A staged copy of `Zelda Tablet.mb` sits in
+`~/Documents/maya/projects/default/scenes/roundtrip-check/` waiting for it, and the baseline hashes
+that prove the originals in `~/Downloads/cte 3d model creative/` never move are in
+`$TMPDIR/opencode/roundtrip/sources-before.sha256`. To close it, in one run, from a session started
+after the input guard landed so keyboard input can name its target:
+
+1. Launch Maya, wait for commandPort 7001, then `maya.connect` and `health.check`.
+2. Read the tree for `openSceneButton` and click its reported centre, then screenshot before the
+   next click: menus and dialogs shift after they open, so a coordinate read beforehand is stale.
+3. Double-click the entry in the `Files` list. Do not type a path into `Look in`, that is unverified
+   and `computer_type` sends to whatever holds focus.
+4. Edit by clicking a real control, then save with `scene.save_as` onto the copy, so the save
+   mechanics get tested without touching a source file.
+5. Verify three ways and trust none alone: `scene_info`, a `viewport.capture`, and the file on disk
+   (mtime and hash both changed). Reopen the copy to confirm the edit persisted in the file.
+6. Delete the copy and the `roundtrip-check` folder, then re-check the baseline hashes.
+
+**Never drive a GUI while another session is injecting input.** Check with
+`pgrep -fl computer-use` first; three server instances means three sessions can move the pointer.
+While another session was live, a T3 Code prompt appeared in a Maya dialog field under the cursor,
+85 characters typed by this session could not be found in either app's tree, and T3 Code resized
+itself on top of Maya. Maya then hung inside a mouse event handler and macOS killed it.
+`computer_type` and `computer_key` take an optional `app`, and then refuse to send anything unless
+that app is frontmost, naming the app that would have received the input instead. Use it for
+anything that matters. Without `app` the input still goes to whatever holds focus, and a collision
+is indistinguishable from a bug after the fact. Both tools also echo `receivedBy`, the app that
+was frontmost when the input was sent, read just before sending it, so a surprise shows up in the
+result instead of silently. The `app` match is a case-insensitive substring of the app name or an
+exact bundle id, so a short name like `Code` can match more than one app.
+
+**A hung app is now named as one.** `read_screen` used to answer `no windows found for 'Maya'`
+while `list_windows` still listed the window, which sent a session hunting a permissions problem
+it never had. The helper separates the three causes that used to look identical: this process
+lacking Accessibility permission, a running app with no on-screen windows, and a window that is on
+screen while the app's accessibility API answers nothing. The last one says the app is running and
+visible but not answering, that it is likely hung or busy rather than absent, points at
+`sample <pid>`, and suggests screenshots with coordinates meanwhile. Reproduced by stopping TextEdit
+with `kill -STOP`: the new message arrives in 3 seconds. `sample <pid>` on the real Maya hung pinned
+the main thread in `QGuiApplicationPrivate::processMouseEvent`, a mouse event handler rather than a
+file dialog.
+
+### computer-use: known unfixed defects
+
+Verified by reading the source, and by running it where the entry says so. Ranked by how badly each
+can mislead an agent. None of these are fixed as of Oct 18.
+
+- **`element_at` can name an element from the window behind.** The `axpoint` case takes the topmost
+  window from the window server, then descends into the first AX window whose frame contains the
+  point. AX child order is not z-order, so with two overlapping windows from one app it can descend
+  into the one behind and hand back that window's element, after which the click goes through to the
+  window in front. Match the specific server frame rather than just the pid.
+- **`computer_screeninfo.y`, and the whole-desktop `origin`, are in the wrong origin space.**
+  `NSScreen.frame` is bottom-left while click, AX and CGWindowList are all top-left, and
+  `swift/ComputerUse.swift:139` says in as many words that `NSScreen.frame` must not be mixed in
+  here. It is, in the `screeninfo` case and in `unionScreenFrame()`. Harmless on this single-display
+  machine, where y is 0 in both spaces. On a layout with a display above or below the main one,
+  feeding that y into `computer_screenshot --region` captures the wrong rectangle.
+- **A tree cut by depth reports `truncated: false`.** Only the node budget sets that flag, so a tree
+  cut at the depth limit claims to be complete, and `looksOpaque: true` can still be claimed for an
+  app whose content simply sits below the cut.
+- **App resolution can pick the wrong app.** `findApp` matches substrings across
+  `NSWorkspace.runningApplications`, which has no defined order, so `code` can resolve to T3 Code,
+  Visual Studio Code or Xcode arbitrarily. The `app` guard matches the same way, so `app: "Code"`
+  passes while Visual Studio Code is frontmost.
+- **A refused activation reports itself but does not fail.** `computer_app activate` now returns
+  `requested` and `frontmostNow`; read them. It does not retry and does not error.
+- **`computer_screenshot` names a path it has already deleted.** The handler unlinks the file and
+  then reports it. The image is inline in the same result, so read the base64 and ignore the path.
+- Nits: `captureAsPng` is a constant `true` with a dead branch, which warns on every build;
+  `resample`'s `-Z` branch is unreachable; the harness checks window positions against the main
+  display, so a display above the main one fails it for no reason.
+
 ### Driving chat and message composers
 
 Rule learned from Codex's computer-use app playbooks, and it applies anywhere an
@@ -259,8 +390,8 @@ Messages, iMessage, a search field, anything with a Send button.
 ### Combining both
 
 Maya's viewport is a 3D canvas with no useful accessibility tree. Use the API
-for geometry and peekaboo for anything visual or interactive: peekaboo to
-confirm the Maya window is real and framed correctly, the API to build, then
+for geometry and `computer-use` for GUI work, as in the section above:
+`computer-use` to see the window and click it, the API to build, then
 `viewport.capture` to verify the result. When a capture and the API disagree,
 trust the API for existence and the capture for appearance, and investigate.
 
