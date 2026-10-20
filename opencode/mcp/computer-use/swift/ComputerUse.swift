@@ -39,12 +39,19 @@ func parseArgs() -> Args {
     while i < argv.count {
         let tok = argv[i]
         if tok.hasPrefix("--") {
-            let name = String(tok.dropFirst(2))
-            if i + 1 < argv.count, !argv[i + 1].hasPrefix("--") {
-                a.flags[name] = argv[i + 1]
+            // --name=value is accepted so that a value beginning with -- survives the parse.
+            // A separate token was only taken as a value when it did not start with --, so
+            // asking to type the literal text "--help" dropped the argument and the command
+            // reported "no text to type", as if nothing had been passed at all.
+            let body = tok.dropFirst(2)
+            if let eq = body.firstIndex(of: "=") {
+                a.flags[String(body[body.startIndex..<eq])] = String(body[body.index(after: eq)...])
+                i += 1
+            } else if i + 1 < argv.count, !argv[i + 1].hasPrefix("--") {
+                a.flags[String(body)] = argv[i + 1]
                 i += 2
             } else {
-                a.has.insert(name)
+                a.has.insert(String(body))
                 i += 1
             }
         } else {
@@ -554,6 +561,21 @@ func unionScreenFrame() -> CGRect? {
     return u.isEmpty ? nil : u
 }
 
+// A region that reaches past the displays is captured clipped to them, and the pixels then
+// describe fewer points than were asked for. Intersecting with the display bounds first makes
+// the point width used for `scale` the width that will actually be captured.
+//
+// Clamped against every display rather than only the one being captured. With --display
+// naming a single display and a region reaching past it, the capture clips to that display
+// while this clamps to the whole desktop, so scale can still overstate the true ratio.
+func clampRegionToDisplays(_ r: CGRect) -> CGRect {
+    let screens = displayBoundsTopLeft()
+    guard let first = screens.first else { return r }
+    let union = screens.dropFirst().reduce(first) { $0.union($1) }
+    let clamped = r.intersection(union)
+    return clamped.isNull || clamped.isEmpty ? r : clamped
+}
+
 // Shrink only. Callers must not ask to grow.
 func resample(_ path: String, to targetW: Int, _ targetH: Int, from w0: Int, _ h0: Int) {
     let conv = Process()
@@ -621,10 +643,21 @@ case "screenshot":
     // passes, which is what hurts small text.
     let captureAsPng = true
     var argv = ["/usr/sbin/screencapture", "-x", captureAsPng ? "-tpng" : "-tjpeg"]
+    // A region that runs past the edge of a display comes back clipped by screencapture, so
+    // the pixels describe fewer points than were asked for. Clamp to the displays first, and
+    // take the point width from the clamped rect: deriving it from the raw request made
+    // `scale` wrong by the clipping factor, so a 4000pt-wide region on a 1920pt display
+    // reported 0.96 where the true ratio was 2, and every coordinate read off that image
+    // landed at twice the distance.
+    var requestedRegion: CGRect?
     if let r = args.flags["region"] {
         let parts = r.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
         guard parts.count == 4 else { fail("--region must be x,y,w,h") }
-        argv.append("-R\(Int(parts[0])),\(Int(parts[1])),\(Int(parts[2])),\(Int(parts[3]))")
+        requestedRegion = CGRect(x: parts[0], y: parts[1], width: parts[2], height: parts[3])
+    }
+    let capturedRegion = requestedRegion.map(clampRegionToDisplays)
+    if let c = capturedRegion {
+        argv.append("-R\(Int(c.minX)),\(Int(c.minY)),\(Int(c.width)),\(Int(c.height))")
     }
     if let d = args.flags["display"], let i = Int(d) {
         // screeninfo reports a 0-based index; screencapture -D is 1-based and
@@ -647,9 +680,8 @@ case "screenshot":
     // image pixels and screen points are the same units, which is what the tools
     // promise. --full-res keeps native pixels and is independent of --png.
     var pointW: Int? = nil
-    if let d = args.flags["region"] {
-        let parts = d.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
-        if parts.count == 4, parts[2] > 0 { pointW = Int(parts[2]) }
+    if let c = capturedRegion {
+        if c.width > 0 { pointW = Int(c.width) }
     } else if let target = targetDisplay()?.frame ?? unionScreenFrame(), Int(target.width) > 0 {
         pointW = Int(target.width)
     }
@@ -688,11 +720,12 @@ case "screenshot":
         // A whole-screen capture on a multi-display setup spans the union of all
         // displays, so image pixel (0,0) is not global (0,0). Say so, otherwise the
         // point-matched promise looks trustworthy while being offset.
-        if let d = args.flags["region"] {
-            let parts = d.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
-            if parts.count == 4 {
-                node["origin"] = [Int(parts[0]), Int(parts[1])]
-            }
+        if let c = capturedRegion {
+            node["origin"] = [Int(c.minX), Int(c.minY)]
+            // Only set when it differs from the request, so a caller can tell that it got a
+            // smaller rect than it asked for and must not read coordinates as if it spanned
+            // the whole request.
+            if let r = requestedRegion, !r.equalTo(c) { node["regionClipped"] = true }
         } else if let u = unionScreenFrame() {
             node["origin"] = [Int(u.minX), Int(u.minY)]
             node["coversAllDisplays"] = NSScreen.screens.count > 1
@@ -712,7 +745,15 @@ case "move":
     emit(["x": Int(x), "y": Int(y)])
 
 case "click":
-    let x = doubleFlag("x", -1), y = doubleFlag("y", -1)
+    // Both coordinates are required, and both are always moved to. They used to default to
+    // -1 and the move was skipped unless both were non-negative, so a click with either one
+    // missing fired wherever the cursor already was and then reported success. Values below
+    // zero are legitimate: a display to the left of or above the main one sits at negative
+    // global coordinates in the same space click takes.
+    guard let xs = args.flags["x"], let ys = args.flags["y"],
+          let x = Double(xs), let y = Double(ys) else {
+        fail("usage: computeruse click --x <pt> --y <pt> [--button left|right|middle] [--count 1-3]")
+    }
     let count = intFlag("count", 1)
     let button = (args.flags["button"] ?? "left").lowercased()
     let cgButton: CGMouseButton
@@ -724,7 +765,7 @@ case "click":
     default: fail("--button must be left, right, or middle")
     }
     guard count >= 1 && count <= 3 else { fail("--count must be 1-3") }
-    if x >= 0 && y >= 0 { moveCursor(to: CGPoint(x: x, y: y)) }
+    moveCursor(to: CGPoint(x: x, y: y))
     let pt = CGEvent(source: nil)?.location ?? .zero
     for clickIndex in 1...count {
         let down = CGEvent(mouseEventSource: SRC, mouseType: downType,
@@ -811,6 +852,9 @@ case "key":
     guard let keyName = rest.first else { fail("usage: computeruse key <name> [--mod cmd,shift]") }
     setModifiers(args.flags["mod"] ?? args.flags["modifiers"])
     let repeatCount = intFlag("repeat", 1)
+    // 0..<n traps the process when n < 1, so a negative repeat crashed the helper instead of
+    // doing nothing.
+    guard repeatCount >= 1 else { fail("--repeat must be at least 1") }
     let kc = resolveKeycode(keyName)
     for _ in 0..<repeatCount {
         postKey(kc, flags: modFlags, down: true)
@@ -867,12 +911,23 @@ case "launch":
 
 case "activate":
     guard let name = rest.first, let app = findApp(query: name) else { fail("no running app matching '\(rest.first ?? "")'") }
-    app.activate(options: [.activateAllWindows])
+    let ok = app.activate(options: [.activateAllWindows])
     usleep(200_000)
     // activateAllWindows can still leave a window flagged minimized. Pass --clamp to
     // also pull windows that are mostly off the displays back into view.
     let repairs = repairWindows(pid: app.processIdentifier, clamp: args.has.contains("clamp"))
-    emit(["activated": app.localizedName ?? "", "repaired": repairs])
+    // The refusal used to be discarded, so an activation that moved nothing still read as a
+    // clean success. Report what was requested and what is frontmost now, which is the part
+    // a caller cannot see for itself.
+    let front = NSWorkspace.shared.frontmostApplication
+    emit([
+        "activated": app.localizedName ?? "",
+        "pid": app.processIdentifier,
+        "requested": ok,
+        "frontmostNow": front?.processIdentifier == app.processIdentifier,
+        "frontmostApp": front?.localizedName ?? "",
+        "repaired": repairs,
+    ])
 
 case "quit":
     guard let name = rest.first, let app = findApp(query: name) else { fail("no running app matching '\(rest.first ?? "")'") }
@@ -937,7 +992,25 @@ case "ax":
         out["truncated"] = nodeBudget <= 0
         for (k, v) in opacityReport(list, truncated: nodeBudget <= 0) { out[k] = v }
     } else {
-        fail("no windows found for '\(appName)' (app may be launching or has no on-screen windows)")
+        // axChildren returned nothing. Three unrelated causes look identical from here, and the
+        // message below used to name the least likely one. Gather independent evidence instead:
+        // this process's own trust state first, then the window server, which can still see an
+        // app that has stopped answering accessibility queries. Reporting a hung app as "no
+        // windows" sent a whole debugging session hunting a settings problem it never had.
+        if !AXIsProcessTrusted() {
+            fail("the accessibility API returned no windows for '\(appName)', and this process does "
+                + "not have Accessibility permission, so no app's tree can be read. Grant it to the "
+                + "app hosting this server, then restart that app.")
+        }
+        let serverWindows = serverFrames(pid: pid)
+        if serverWindows.isEmpty {
+            fail("'\(appName)' is running but has no on-screen windows for the accessibility API to read")
+        }
+        fail("the accessibility API returned no windows for '\(appName)' while the window server "
+            + "reports \(serverWindows.count) on screen. The app is running and visible but not "
+            + "answering accessibility queries, so it is likely hung or busy rather than absent. "
+            + "Check the process with `sample \(pid)`, and prefer computer_screenshot with "
+            + "coordinates in the meantime.")
     }
     emit(out)
 

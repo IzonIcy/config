@@ -13,7 +13,8 @@ import { spawn, execFile } from "node:child_process";
 import { writeFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const BIN = process.argv[2] || new URL("../dist/index.js", import.meta.url).pathname;
+const BIN =
+	process.argv[2] || new URL("../dist/index.js", import.meta.url).pathname;
 const CLI = new URL("../bin/computeruse", import.meta.url).pathname;
 const p = spawn("node", [BIN], { stdio: ["pipe", "pipe", "inherit"] });
 
@@ -55,7 +56,10 @@ async function call(name, args = {}) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const text = (r) =>
-	r.content?.filter((c) => c.type === "text").map((c) => c.text).join("\n") ?? "";
+	r.content
+		?.filter((c) => c.type === "text")
+		.map((c) => c.text)
+		.join("\n") ?? "";
 // Tools report failures as an error string in a text block, so never assume JSON.
 function json(r) {
 	try {
@@ -65,7 +69,9 @@ function json(r) {
 	}
 }
 const running = async (name) =>
-	(json(await call("computer_list_apps"))?.apps ?? []).some((a) => a.name === name);
+	(json(await call("computer_list_apps"))?.apps ?? []).some(
+		(a) => a.name === name,
+	);
 const killTextEdit = () =>
 	call("computer_applescript", {
 		code: 'do shell script "killall TextEdit 2>/dev/null || true"',
@@ -74,7 +80,9 @@ const killTextEdit = () =>
 const failures = [];
 const probes = [];
 function check(name, cond, detail = "") {
-	console.log(`${cond ? "PASS" : "FAIL"}: ${name}${detail ? " - " + detail : ""}`);
+	console.log(
+		`${cond ? "PASS" : "FAIL"}: ${name}${detail ? " - " + detail : ""}`,
+	);
 	if (!cond) failures.push(name);
 }
 function probe(name, cond, detail = "") {
@@ -151,7 +159,8 @@ async function main() {
 		clientInfo: { name: "test-client", version: "1.0.0" },
 	});
 	p.stdin.write(
-		JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }) + "\n",
+		JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }) +
+			"\n",
 	);
 
 	const tools = await rpc("tools/list", {});
@@ -224,7 +233,9 @@ async function main() {
 	});
 	console.log(
 		"AXSYNC selftest:",
-		self ? `${self.cases.filter((c) => c.pass).length}/${self.cases.length} passed` : "could not run",
+		self
+			? `${self.cases.filter((c) => c.pass).length}/${self.cases.length} passed`
+			: "could not run",
 	);
 	check(
 		"AX/window-server frame matcher handles stale, partial and reordered sets",
@@ -248,11 +259,19 @@ async function main() {
 	);
 	check(
 		"nodes is a real count, not a leftover budget",
-		typeof t3b?.nodes === "number" && t3b.nodes > 0 && t3b.nodes <= t3b.nodeLimit,
+		typeof t3b?.nodes === "number" &&
+			t3b.nodes > 0 &&
+			t3b.nodes <= t3b.nodeLimit,
 		`nodes=${t3b?.nodes} limit=${t3b?.nodeLimit}`,
 	);
-	check("tree reports whether it was truncated", typeof t3b?.truncated === "boolean");
-	check("tree reports whether AX had settled", typeof t3b?.axSettled === "boolean");
+	check(
+		"tree reports whether it was truncated",
+		typeof t3b?.truncated === "boolean",
+	);
+	check(
+		"tree reports whether AX had settled",
+		typeof t3b?.axSettled === "boolean",
+	);
 
 	// ---- tier 1: error path ---------------------------------------------------
 	const bad = await call("computer_app", {
@@ -265,12 +284,94 @@ async function main() {
 		"-",
 		(bad.content?.[0]?.text || "").split("\n")[0].slice(0, 100),
 	);
-	check("unknown app returns an error instead of throwing", bad.isError === true);
+	check(
+		"unknown app returns an error instead of throwing",
+		bad.isError === true,
+	);
+	// The permissions guidance is attached only when the failure points that way. Appending
+	// it to every error, a hung app included, is how an agent ends up in System Settings for
+	// a problem that was never about settings.
+	check(
+		"a non-permission failure is not dressed up as a permissions problem",
+		!/System Settings/.test(text(bad)),
+		text(bad).split("\n")[0].slice(0, 90),
+	);
+
+	// ---- input target guard ---------------------------------------------------
+	// computer_type and computer_key deliver to whatever is frontmost, so a session
+	// that steals focus receives the text instead. With `app` the tool refuses to
+	// send anything unless that app is frontmost. A bogus name can never be
+	// frontmost, so the refusals below are deterministic, and they send no input.
+	const bogusKey = await call("computer_key", {
+		key: "escape",
+		app: "Definitely Not A Real App XYZ",
+	});
+	console.log(
+		"GUARD key:",
+		text(bogusKey).split("\n").join(" | ").slice(0, 160),
+	);
+	check(
+		"key refuses to fire when the named app is not frontmost",
+		bogusKey.isError === true && /is not frontmost/.test(text(bogusKey)),
+	);
+	check(
+		"the refusal names the app that would have received the input",
+		/Focus is on \S/.test(text(bogusKey)),
+	);
+	const bogusType = await call("computer_type", {
+		text: "this must never be typed anywhere",
+		app: "Definitely Not A Real App XYZ",
+	});
+	check(
+		"typing refuses when the named app is not frontmost",
+		bogusType.isError === true && /is not frontmost/.test(text(bogusType)),
+	);
+	const clash = await call("computer_key", {
+		key: "escape",
+		mod: "cmd",
+		modifiers: "shift",
+	});
+	check(
+		"disagreeing mod and modifiers is an error, not a silent pick",
+		clash.isError === true && /disagree/.test(text(clash)),
+	);
+	// modifiers is accepted as an alias for mod, and the echo proves the value
+	// reached the CLI instead of being dropped. shift+escape is inert.
+	const alias = json(
+		await call("computer_key", { key: "escape", modifiers: "shift" }),
+	);
+	check(
+		"modifiers is an accepted alias for mod",
+		alias?.modifiers?.includes("shift") === true,
+		JSON.stringify(alias?.modifiers),
+	);
+	check(
+		"a key press reports the app that received it",
+		typeof alias?.receivedBy?.name === "string",
+		alias?.receivedBy?.name ?? "(no receivedBy)",
+	);
+	// Focus is global and other sessions share this machine, so this one is an
+	// observation: if focus moved between the two calls, the guard correctly refused.
+	const frontNow = json(await call("computer_list_apps"))?.apps.find(
+		(u) => u.frontmost,
+	)?.name;
+	const allowed = frontNow
+		? json(await call("computer_key", { key: "escape", app: frontNow }))
+		: null;
+	probe(
+		"the guard lets input through when the named app is frontmost",
+		allowed?.receivedBy?.name === frontNow,
+		frontNow
+			? `named ${frontNow}, receivedBy ${allowed?.receivedBy?.name}`
+			: "no frontmost app",
+	);
 
 	// ---- tier 1: applescript -------------------------------------------------
 	check(
 		"applescript escape hatch evaluates",
-		text(await call("computer_applescript", { code: "return 6 * 7" })).trim() === "42",
+		text(
+			await call("computer_applescript", { code: "return 6 * 7" }),
+		).trim() === "42",
 	);
 
 	// ---- tier 2: real GUI round trip, best effort -----------------------------
@@ -387,8 +488,12 @@ end tell`,
 		await call("computer_key", { key: "forwarddelete" });
 		await sleep(450);
 		const pre =
-			areaAt(textAreas(json(await call("computer_read_screen", { app: "TextEdit" }))), a.pos)
-				?.value ?? "";
+			areaAt(
+				textAreas(
+					json(await call("computer_read_screen", { app: "TextEdit" })),
+				),
+				a.pos,
+			)?.value ?? "";
 		if (pre.trim() !== "") {
 			typeDetail = `field not empty after clear: ${JSON.stringify(pre.slice(0, 40))}`;
 			continue;
@@ -396,8 +501,12 @@ end tell`,
 		await call("computer_type", { text: want });
 		await sleep(800);
 		const got =
-			areaAt(textAreas(json(await call("computer_read_screen", { app: "TextEdit" }))), a.pos)
-				?.value ?? "";
+			areaAt(
+				textAreas(
+					json(await call("computer_read_screen", { app: "TextEdit" })),
+				),
+				a.pos,
+			)?.value ?? "";
 		typed = got.trim() === want;
 		typeDetail = typed
 			? "typed text round-tripped through the tree"
@@ -416,12 +525,15 @@ end tell`,
 		"window manager may stack another app on top",
 	);
 
-	const wins = json(await call("computer_list_windows", { app: "TextEdit" }))
-		?.windows;
+	const wins = json(
+		await call("computer_list_windows", { app: "TextEdit" }),
+	)?.windows;
 	if (wins) {
 		console.log(
 			"WINDOWS:",
-			wins.map((x) => `${x.app} ${x.width}x${x.height} @(${x.x},${x.y})`).join(" | "),
+			wins
+				.map((x) => `${x.app} ${x.width}x${x.height} @(${x.x},${x.y})`)
+				.join(" | "),
 		);
 		check(
 			"windows are reported on screen",
@@ -438,7 +550,9 @@ end tell`,
 
 	console.log(
 		"SCROLL:",
-		JSON.stringify(json(await call("computer_scroll", { dy: 1, x: 10, y: 300 }))),
+		JSON.stringify(
+			json(await call("computer_scroll", { dy: 1, x: 10, y: 300 })),
+		),
 	);
 
 	return frontBefore;
