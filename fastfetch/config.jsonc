@@ -36,7 +36,7 @@
     },
     {
       "type": "shell",
-      "key": ">_",
+      "key": " ",
     },
     {
       "type": "terminal",
