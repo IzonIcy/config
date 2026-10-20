@@ -131,10 +131,10 @@ function fmt(result: unknown): CallToolResult {
 // caller names an app, send nothing unless that app is frontmost, and always report the app
 // that held focus when the input was sent.
 const APP_GUARD =
-	"Optional guard: refuse to send input unless this app is frontmost. Matched as a " +
-	"case-insensitive substring of the app name, or an exact bundle id, so a short name can " +
-	"match more than one app. Use it whenever focus can move underneath you. The result " +
-	"reports the app that was frontmost when the input was sent, read just before sending it.";
+	"Optional guard: refuse to send input unless this app is frontmost. Matched exactly, " +
+	"case-insensitively, against the app name or its bundle id. Use it whenever focus can " +
+	"move underneath you. The result reports the app that was frontmost when the input was " +
+	"sent, read just before sending it.";
 
 async function frontApp(): Promise<FrontApp | null> {
 	try {
@@ -146,10 +146,12 @@ async function frontApp(): Promise<FrontApp | null> {
 	}
 }
 
+// Exact name or bundle id. A substring match is what let `app: "Code"` pass while
+// Visual Studio Code was frontmost and the caller meant T3 Code.
 function appMatches(front: FrontApp, wanted: string): boolean {
 	const want = wanted.trim().toLowerCase();
 	return (
-		front.name.toLowerCase().includes(want) ||
+		front.name.toLowerCase() === want ||
 		(front.bundleId ?? "").toLowerCase() === want
 	);
 }
@@ -280,8 +282,10 @@ server.registerTool(
 				},
 				{
 					type: "text" as const,
+					// No path here: the file is deleted below and the image is inline in
+					// this same result, so naming it only invited a read that must fail.
 					text:
-						`Screenshot ${meta.width}x${meta.height}px (${meta.format}) at ${path}\n` +
+						`Screenshot ${meta.width}x${meta.height}px (${meta.format})\n` +
 						`Coordinate space: ${units}.`,
 				},
 			],

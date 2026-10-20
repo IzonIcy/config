@@ -272,6 +272,20 @@ async function main() {
 		"tree reports whether AX had settled",
 		typeof t3b?.axSettled === "boolean",
 	);
+	// Depth is a cut too. It used to be invisible unless the node budget ran out,
+	// so a partial tree read as complete.
+	const shallow = json(
+		await call("computer_read_screen", {
+			app: "T3 Code (Nightly)",
+			depth: 1,
+			max: 4000,
+		}),
+	);
+	check(
+		"a tree cut by depth reports truncated",
+		shallow?.truncated === true && shallow?.nodes < 4000,
+		`truncated=${shallow?.truncated} nodes=${shallow?.nodes}`,
+	);
 
 	// ---- tier 1: error path ---------------------------------------------------
 	const bad = await call("computer_app", {
@@ -365,6 +379,18 @@ async function main() {
 			? `named ${frontNow}, receivedBy ${allowed?.receivedBy?.name}`
 			: "no frontmost app",
 	);
+	// A prefix of the frontmost app's name used to pass, because the match was a
+	// substring. That is the same looseness that let `app: "Code"` accept Visual
+	// Studio Code when the caller meant T3 Code.
+	if (frontNow && frontNow.length > 1) {
+		const prefix = frontNow.slice(0, frontNow.length - 1);
+		const loose = await call("computer_key", { key: "escape", app: prefix });
+		check(
+			"a partial app name is refused instead of matching",
+			loose.isError === true && /is not frontmost/.test(text(loose)),
+			`named ${prefix} while ${frontNow} is frontmost`,
+		);
+	}
 
 	// ---- tier 1: applescript -------------------------------------------------
 	check(

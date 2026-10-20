@@ -214,11 +214,16 @@ func repairWindows(pid: pid_t, clamp: Bool) -> [String] {
 var nodeBudget = 600
 var nodeBudgetMax = 600
 var nodesVisited = 0
+// Set when a node had children that the depth limit stopped us from walking. The
+// node budget alone used to decide `truncated`, so a tree cut at maxDepth claimed
+// to be complete.
+var depthTruncated = false
 
 func resetNodeBudget(_ max: Int) {
     nodeBudget = max
     nodeBudgetMax = max
     nodesVisited = 0
+    depthTruncated = false
 }
 
 func axNode(_ el: AXUIElement, depth: Int, maxDepth: Int) -> [String: Any] {
@@ -232,13 +237,19 @@ func axNode(_ el: AXUIElement, depth: Int, maxDepth: Int) -> [String: Any] {
     if axString(el, kAXFocusedAttribute as String) == "1" { node["focused"] = true }
     nodeBudget -= 1
     nodesVisited += 1
-    if depth < maxDepth, nodeBudget > 0, let kids = axChildren(el) {
-        var out: [[String: Any]] = []
-        for k in kids {
-            if nodeBudget <= 0 { break }
-            out.append(axNode(k, depth: depth + 1, maxDepth: maxDepth))
+    // Ask for children even at the depth limit, because an empty answer is what
+    // separates a real leaf from a subtree the walk was not allowed to enter.
+    if nodeBudget > 0, let kids = axChildren(el), !kids.isEmpty {
+        if depth < maxDepth {
+            var out: [[String: Any]] = []
+            for k in kids {
+                if nodeBudget <= 0 { break }
+                out.append(axNode(k, depth: depth + 1, maxDepth: maxDepth))
+            }
+            if !out.isEmpty { node["children"] = out }
+        } else {
+            depthTruncated = true
         }
-        if !out.isEmpty { node["children"] = out }
     }
     return node
 }
@@ -254,6 +265,13 @@ func axFrame(_ el: AXUIElement) -> CGRect? {
 func frameContains(_ el: AXUIElement, _ pt: CGPoint) -> Bool {
     guard let f = axFrame(el) else { return false }
     return f.contains(pt)
+}
+
+// Same tolerance framesAgree uses: AX and the window server disagree by a pixel or two.
+func frameMatches(_ el: AXUIElement, _ r: CGRect, tol: CGFloat = 2) -> Bool {
+    guard let f = axFrame(el) else { return false }
+    return abs(f.minX - r.minX) <= tol && abs(f.minY - r.minY) <= tol
+        && abs(f.width - r.width) <= tol && abs(f.height - r.height) <= tol
 }
 
 // AXUIElementCopyElementAtPosition answers with whatever sits highest in the
@@ -362,10 +380,24 @@ func findApp(query: String) -> NSRunningApplication? {
         return app
     }
     let q = query.lowercased()
-    return running.first { $0.bundleIdentifier?.lowercased() == q }
-        ?? running.first { $0.localizedName?.lowercased() == q }
-        ?? running.first { $0.localizedName?.lowercased().contains(q) ?? false }
-        ?? running.first { $0.bundleIdentifier?.lowercased().contains(q) ?? false }
+    // Exact matches win outright, bundle id before name.
+    if let exact = running.first(where: { $0.bundleIdentifier?.lowercased() == q })
+        ?? running.first(where: { $0.localizedName?.lowercased() == q }) {
+        return exact
+    }
+    // A substring is only good enough when it names one app. runningApplications has
+    // no defined order, so taking the first substring match made `code` resolve to
+    // T3 Code, Visual Studio Code or Xcode arbitrarily.
+    let matches = running.filter {
+        ($0.localizedName?.lowercased().contains(q) ?? false)
+            || ($0.bundleIdentifier?.lowercased().contains(q) ?? false)
+    }
+    if matches.count == 1 { return matches[0] }
+    if matches.count > 1 {
+        let names = matches.compactMap { $0.localizedName }.sorted().joined(separator: ", ")
+        fail("'\(query)' matches \(matches.count) running apps: \(names). Use a bundle id or pid.")
+    }
+    return nil
 }
 
 func resolveAXApp() -> (AXUIElement, String, pid_t) {
@@ -545,19 +577,21 @@ func moveCursor(to pt: CGPoint) {
 
 // The capture target as screen points, so the captured pixels can be scaled back to
 // the point space that click/axpoint/ax use. nil means "keep native pixels".
-func targetDisplay() -> NSScreen? {
-    if let d = args.flags["display"], let i = Int(d), NSScreen.screens.indices.contains(i) {
-        return NSScreen.screens[i]
+// Indexed by the same list screeninfo reports, which is CGGetActiveDisplayList.
+func targetDisplay() -> CGRect? {
+    let screens = displayBoundsTopLeft()
+    if let d = args.flags["display"], let i = Int(d), screens.indices.contains(i) {
+        return screens[i]
     }
-    if NSScreen.screens.count == 1 { return NSScreen.main }
+    if screens.count == 1 { return screens[0] }
     // Multiple displays: screencapture spans all of them, so the union is the target.
     return nil
 }
 
 func unionScreenFrame() -> CGRect? {
-    guard NSScreen.screens.count > 1 else { return nil }
-    var u = CGRect.null
-    for s in NSScreen.screens { u = u.union(s.frame) }
+    let screens = displayBoundsTopLeft()
+    guard screens.count > 1, let first = screens.first else { return nil }
+    let u = screens.dropFirst().reduce(first) { $0.union($1) }
     return u.isEmpty ? nil : u
 }
 
@@ -622,13 +656,19 @@ case "perms":
     ])
 
 case "screeninfo":
+    // Reported in the same top-left space as click, axpoint and CGWindowList.
+    // NSScreen.frame is bottom-left, so mixing it in put y in a second origin.
+    var displayCount: UInt32 = 0
+    CGGetActiveDisplayList(0, nil, &displayCount)
+    var displayIds = [CGDirectDisplayID](repeating: 0, count: Int(displayCount))
+    if displayCount > 0 { CGGetActiveDisplayList(displayCount, &displayIds, &displayCount) }
     var screens: [[String: Any]] = []
-    for (i, s) in NSScreen.screens.enumerated() {
-        let f = s.frame
+    for (i, id) in displayIds.prefix(Int(displayCount)).enumerated() {
+        let f = CGDisplayBounds(id)
         screens.append([
             "index": i,
-            "displayId": s.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? Int ?? 0,
-            "isMain": s == NSScreen.main,
+            "displayId": Int(id),
+            "isMain": id == CGMainDisplayID(),
             "x": f.origin.x, "y": f.origin.y,
             "width": f.width, "height": f.height,
         ])
@@ -682,7 +722,7 @@ case "screenshot":
     var pointW: Int? = nil
     if let c = capturedRegion {
         if c.width > 0 { pointW = Int(c.width) }
-    } else if let target = targetDisplay()?.frame ?? unionScreenFrame(), Int(target.width) > 0 {
+    } else if let target = targetDisplay() ?? unionScreenFrame(), Int(target.width) > 0 {
         pointW = Int(target.width)
     }
 
@@ -980,8 +1020,9 @@ case "ax":
         let tree = axNode(el, depth: 0, maxDepth: maxDepth)
         out["tree"] = tree
         out["nodes"] = nodesVisited
-        out["truncated"] = nodeBudget <= 0
-        for (k, v) in opacityReport([tree], truncated: nodeBudget <= 0) { out[k] = v }
+        let truncated = nodeBudget <= 0 || depthTruncated
+        out["truncated"] = truncated
+        for (k, v) in opacityReport([tree], truncated: truncated) { out[k] = v }
     } else if let windows = axChildren(el) {
         var list: [[String: Any]] = []
         for w in windows where nodeBudget > 0 {
@@ -989,8 +1030,9 @@ case "ax":
         }
         out["windows"] = list
         out["nodes"] = nodesVisited
-        out["truncated"] = nodeBudget <= 0
-        for (k, v) in opacityReport(list, truncated: nodeBudget <= 0) { out[k] = v }
+        let truncated = nodeBudget <= 0 || depthTruncated
+        out["truncated"] = truncated
+        for (k, v) in opacityReport(list, truncated: truncated) { out[k] = v }
     } else {
         // axChildren returned nothing. Three unrelated causes look identical from here, and the
         // message below used to name the least likely one. Gather independent evidence instead:
@@ -1039,13 +1081,16 @@ case "axpoint":
     }
 
     // Our answer: descend from that window. Filter to AXWindow so we never walk into
-    // the menu bar, matching every other AX walk in this file.
+    // the menu bar, matching every other AX walk in this file. AX child order is not
+    // z-order, so accepting any AXWindow that contains the point can descend into one
+    // sitting behind it, and the click then lands on the window in front. Match the
+    // frame the window server named as topmost instead.
     var chosen: AXUIElement?
     if let t = top {
         let appEl = AXUIElementCreateApplication(t.pid)
         for win in (axChildren(appEl) ?? [])
         where axString(win, kAXRoleAttribute as String) == (kAXWindowRole as String)
-            && frameContains(win, pt) {
+            && frameMatches(win, t.frame) {
             chosen = deepestLeaf(win, pt)
             break
         }

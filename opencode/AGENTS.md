@@ -321,8 +321,9 @@ that app is frontmost, naming the app that would have received the input instead
 anything that matters. Without `app` the input still goes to whatever holds focus, and a collision
 is indistinguishable from a bug after the fact. Both tools also echo `receivedBy`, the app that
 was frontmost when the input was sent, read just before sending it, so a surprise shows up in the
-result instead of silently. The `app` match is a case-insensitive substring of the app name or an
-exact bundle id, so a short name like `Code` can match more than one app.
+result instead of silently. The `app` match is exact and case-insensitive against the app name or
+its bundle id, so a partial name is refused rather than guessed. That exactness matters: the old
+substring match accepted `app: "Code"` while Visual Studio Code was frontmost.
 
 **A hung app is now named as one.** `read_screen` used to answer `no windows found for 'Maya'`
 while `list_windows` still listed the window, which sent a session hunting a permissions problem
@@ -335,33 +336,10 @@ with `kill -STOP`: the new message arrives in 3 seconds. `sample <pid>` on the r
 the main thread in `QGuiApplicationPrivate::processMouseEvent`, a mouse event handler rather than a
 file dialog.
 
-### computer-use: known unfixed defects
+### computer-use: known defects
 
-Verified by reading the source, and by running it where the entry says so. Ranked by how badly each
-can mislead an agent. None of these are fixed as of Oct 18.
-
-- **`element_at` can name an element from the window behind.** The `axpoint` case takes the topmost
-  window from the window server, then descends into the first AX window whose frame contains the
-  point. AX child order is not z-order, so with two overlapping windows from one app it can descend
-  into the one behind and hand back that window's element, after which the click goes through to the
-  window in front. Match the specific server frame rather than just the pid.
-- **`computer_screeninfo.y`, and the whole-desktop `origin`, are in the wrong origin space.**
-  `NSScreen.frame` is bottom-left while click, AX and CGWindowList are all top-left, and
-  `swift/ComputerUse.swift:139` says in as many words that `NSScreen.frame` must not be mixed in
-  here. It is, in the `screeninfo` case and in `unionScreenFrame()`. Harmless on this single-display
-  machine, where y is 0 in both spaces. On a layout with a display above or below the main one,
-  feeding that y into `computer_screenshot --region` captures the wrong rectangle.
-- **A tree cut by depth reports `truncated: false`.** Only the node budget sets that flag, so a tree
-  cut at the depth limit claims to be complete, and `looksOpaque: true` can still be claimed for an
-  app whose content simply sits below the cut.
-- **App resolution can pick the wrong app.** `findApp` matches substrings across
-  `NSWorkspace.runningApplications`, which has no defined order, so `code` can resolve to T3 Code,
-  Visual Studio Code or Xcode arbitrarily. The `app` guard matches the same way, so `app: "Code"`
-  passes while Visual Studio Code is frontmost.
-- **A refused activation reports itself but does not fail.** `computer_app activate` now returns
+- **A refused activation reports itself but does not fail.** `computer_app activate` returns
   `requested` and `frontmostNow`; read them. It does not retry and does not error.
-- **`computer_screenshot` names a path it has already deleted.** The handler unlinks the file and
-  then reports it. The image is inline in the same result, so read the base64 and ignore the path.
 - Nits: `captureAsPng` is a constant `true` with a dead branch, which warns on every build;
   `resample`'s `-Z` branch is unreachable; the harness checks window positions against the main
   display, so a display above the main one fails it for no reason.
