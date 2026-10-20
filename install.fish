@@ -69,6 +69,37 @@ function check_config --argument-names name source_root target_root
     end
 end
 
+# Tools that read their config from $HOME instead of XDG_CONFIG_HOME. The real
+# file lives in this repo; only a symlink lives in $HOME.
+function link_home --argument-names name source target
+    if not test -e "$source"
+        echo "✗ Missing: $source" >&2
+        return 1
+    end
+
+    if test -L "$target"
+        set -l current (readlink "$target")
+        if test "$current" = "$source"
+            echo "✓ $name already linked"
+            return 0
+        end
+        echo "! $target points to $current, expected $source" >&2
+        return 1
+    end
+
+    if test -e "$target"
+        echo "! $target exists and is not a symlink" >&2
+        return 1
+    end
+
+    if ln -s "$source" "$target"
+        echo "✓ Linked $name"
+    else
+        echo "✗ Failed to link $name" >&2
+        return 1
+    end
+end
+
 set -l configs \
     atuin \
     btop \
@@ -103,34 +134,11 @@ else if not test -e "$aerospace_src"
     set failed true
 end
 
-# zsh reads its config from the home directory, not from XDG_CONFIG_HOME, so it
-# needs the same explicit link AeroSpace does above.
-set -l zshrc_src "$DOTFILES_DIR/zsh/.zshrc"
-set -l zshrc_dst "$HOME/.zshrc"
-if test -e "$zshrc_src"
-    if test -L "$zshrc_dst"
-        set -l current (readlink "$zshrc_dst")
-        if test "$current" = "$zshrc_src"
-            echo "✓ zshrc already linked"
-        else
-            echo "! $zshrc_dst points to $current, expected $zshrc_src" >&2
-            set failed true
-        end
-    else if test -e "$zshrc_dst"
-        echo "! $zshrc_dst exists and is not a symlink" >&2
-        set failed true
-    else
-        if ln -s "$zshrc_src" "$zshrc_dst"
-            echo "✓ Linked zshrc"
-        else
-            echo "✗ Failed to link zshrc" >&2
-            set failed true
-        end
-    end
-else
-    echo "✗ Missing: $zshrc_src" >&2
-    set failed true
-end
+# zsh and git read their config from the home directory, not from
+# XDG_CONFIG_HOME, so they need the same explicit link AeroSpace does above.
+link_home zshrc "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"; or set failed true
+link_home zshenv "$DOTFILES_DIR/zsh/.zshenv" "$HOME/.zshenv"; or set failed true
+link_home gitignore_global "$DOTFILES_DIR/git/.gitignore_global" "$HOME/.gitignore_global"; or set failed true
 
 if $failed
     echo "Configuration check failed. No tools or completions were changed." >&2

@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+*.orig
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Dependencies
+node_modules/
+.vendor/
+.bundle/
+vendor/bundle/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build
+dist/
+build/
+target/
+*.pyc
+__pycache__/
+
+**/.claude/settings.local.json
