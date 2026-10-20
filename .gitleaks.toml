@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "GPG signing key fingerprint is a public identifier, not a secret"
+regexes = ['''36950F0667E43114517E2039136C6A545BF6B491''']
