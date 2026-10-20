@@ -9,6 +9,11 @@
 
 # Secrets / machine-local auth
 github-mcp-token
+# opencode.json reads this via {file:...}. Covered inside opencode/.gitignore
+# too, but a stray copy at the repo root would otherwise be committable.
+.github-token
+# OpenCode v2 writes the background service's auth token here.
+service.json
 gh/hosts.yml
 fish/fish_variables
 fish/conf.d/secrets.fish
