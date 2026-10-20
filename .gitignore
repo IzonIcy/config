@@ -99,3 +99,8 @@ vite-plus/
 # Pre-v2 opencode snapshot, kept as a local rollback. 61MB of node_modules plus
 # live Homebrew tap-trust state and atuin config that XDG_CONFIG_HOME points at.
 opencode-v1/
+
+# Remote desktop setup backup. Carries a 41MB installer plus the machine's
+# serial number, hardware UUID, provisioning UDID, account email and Tailscale
+# node id. Machine state, not dotfiles.
+remote-desktop-setup/
