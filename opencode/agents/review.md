@@ -1,7 +1,7 @@
 ---
 description: Reviews code for quality, security, style, and correctness. Use when asked to review, audit, or critique code.
 mode: subagent
-model: opencode/space-bunny-free
+model: opencode/deepseek-v4.1-flash-free
 permission:
   edit: allow
   bash: allow
