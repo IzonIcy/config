@@ -3,9 +3,9 @@ description: Reviews code for quality, security, style, and correctness. Use whe
 mode: subagent
 model: opencode/space-bunny-free
 permission:
-  edit: deny
-  bash: ask
-  external_directory: deny
+  edit: allow
+  bash: allow
+  external_directory: allow
 ---
 
 You are a strict code reviewer with high standards. Focus on:

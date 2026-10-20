@@ -35,7 +35,7 @@
 		{
 			"action": "shell",
 			"resource": "*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "shell",
@@ -70,22 +70,22 @@
 		{
 			"action": "shell",
 			"resource": "git add*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "shell",
 			"resource": "git commit*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "shell",
 			"resource": "git push*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "shell",
 			"resource": "git checkout*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "shell",
@@ -185,7 +185,7 @@
 		{
 			"action": "external_directory",
 			"resource": "*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "question",
@@ -205,12 +205,12 @@
 		{
 			"action": "github_*",
 			"resource": "*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "git_*",
 			"resource": "*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "playwright_*",
@@ -220,7 +220,7 @@
 		{
 			"action": "chrome-devtools_*",
 			"resource": "*",
-			"effect": "ask"
+			"effect": "allow"
 		},
 		{
 			"action": "memory_*",
