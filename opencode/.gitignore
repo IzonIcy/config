@@ -1,10 +1,11 @@
 node_modules/
-# Unredacted memory store and its backups. memory.public.jsonl is the
-# redacted copy that IS committed; these hold tailnet names, IPs and
-# account emails, so they stay local. Matches *.bak-<suffix> too, which the
+# Agent memory is local-only. The public export was discontinued on
+# 2026-10-20 after it shipped personal data; do not re-add it. These hold
+# tailnet names, IPs and account emails. Matches *.bak-<suffix> too, which the
 # root *.bak rule does not cover.
 memory.jsonl
 memory.jsonl.bak-*
+memory.public.jsonl
 .redact.py
 # v2 writes the background service's auth token here. Secret, never commit.
 service.json
