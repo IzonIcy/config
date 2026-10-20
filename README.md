@@ -13,25 +13,27 @@ exec fish
 
 ## What's Included
 
-| Tool          | Config Location            | Purpose                                         |
-| ------------- | -------------------------- | ----------------------------------------------- |
-| **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings    |
-| **atuin**     | `atuin/`                   | Shell history                                   |
-| **btop**      | `btop/`                    | System monitor and themes                       |
-| **cava**      | `cava/`                    | Audio visualizer and GLSL shaders               |
-| **fastfetch** | `fastfetch/`               | Shell greeting and system summary               |
-| **git**       | `git/config`               | Aliases, delta diff, signed commits             |
-| **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases              |
-| **herdr**     | `herdr/`                   | Terminal workspace manager and plugins          |
-| **karabiner** | `karabiner/karabiner.json` | Key remapping (Caps Lock as Esc / Ctrl)         |
-| **ghostty**   | `ghostty/config`           | Terminal (default colors, ligatures, splits)    |
-| **mole**      | `mole/`                    | Cleanup lists                                   |
-| **opencode**  | `opencode/`                | Agent, skill, MCP, and formatter configuration  |
-| **spicetify** | `spicetify/`               | Spotify themes and extensions                   |
-| **fish**      | `fish/config.fish`         | Shell (atuin, zoxide, eza, mise, abbreviations) |
-| **mise**      | `mise/config.toml`         | Tool versions (node, bun, rust, python)         |
-| **nvim**      | `nvim/`                    | Separately owned Neovim configuration           |
-| **zsh**       | `zsh/.zshrc`               | Login shell (p10k, fzf, atuin, zoxide, mise)    |
+| Tool          | Config Location            | Purpose                                             |
+| ------------- | -------------------------- | --------------------------------------------------- |
+| **aerospace** | `aerospace/aerospace.toml` | Tiling window manager and workspace bindings        |
+| **atuin**     | `atuin/`                   | Shell history                                       |
+| **btop**      | `btop/`                    | System monitor and themes                           |
+| **cava**      | `cava/`                    | Audio visualizer and GLSL shaders                   |
+| **fastfetch** | `fastfetch/`               | Shell greeting and system summary                   |
+| **git**       | `git/`                     | Aliases, delta diff, signed commits, global ignores |
+| **gh**        | `gh/config.yml`            | GitHub CLI preferences and aliases                  |
+| **herdr**     | `herdr/`                   | Terminal workspace manager and plugins              |
+| **karabiner** | `karabiner/karabiner.json` | Key remapping (Caps Lock as Esc / Ctrl)             |
+| **ghostty**   | `ghostty/config`           | Terminal (default colors, ligatures, splits)        |
+| **macos**     | `macos/defaults.sh`        | System defaults applied by `--apply-defaults`       |
+| **mole**      | `mole/`                    | Cleanup lists                                       |
+| **opencode**  | `opencode/`                | Agent, skill, MCP, and formatter configuration      |
+| **raycast**   | `raycast/`                 | Raycast scripts and the endpoint example            |
+| **spicetify** | `spicetify/`               | Spotify themes and extensions                       |
+| **fish**      | `fish/config.fish`         | Shell (atuin, zoxide, eza, mise, abbreviations)     |
+| **mise**      | `mise/config.toml`         | Tool versions (node, bun, rust, python)             |
+| **nvim**      | `nvim/`                    | Separately owned Neovim configuration               |
+| **zsh**       | `zsh/.zshrc`               | Login shell (p10k, fzf, atuin, zoxide, mise)        |
 
 ## Requirements
 
@@ -104,10 +106,11 @@ safe to re-run, and reports what it changed:
 ```
 
 This repository is the live `~/.config` directory. The installer checks the
-configuration directories in place, links AeroSpace to `~/.aerospace.toml`, and
-links `zsh/.zshrc` to `~/.zshrc`, since both tools read their config from the
-home directory rather than XDG_CONFIG_HOME. Runtime state, caches, and generated
-completions are not source configuration.
+configuration directories in place, and links the files that tools read from
+`$HOME` rather than `XDG_CONFIG_HOME`: AeroSpace to `~/.aerospace.toml`,
+`zsh/.zshrc` to `~/.zshrc`, `zsh/.zshenv` to `~/.zshenv`, and
+`git/.gitignore_global` to `~/.gitignore_global`. Runtime state, caches, and
+generated completions are not source configuration.
 
 ## Two Shells
 
