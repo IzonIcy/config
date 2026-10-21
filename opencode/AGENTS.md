@@ -192,6 +192,14 @@ either as intended behaviour, not a fault.
 
 ### maya-mcp (Autodesk Maya 2027)
 
+**Who this is for.** Ryan is in ninth grade and this Maya work is for his modelling class. That
+changes how to work, not whether to. Explain what a tool is doing and why before a wall of code, skip
+the jargon dump, and assume he has not met a given Maya panel before. Keep operations reversible and
+say which one you used, because a school project lost to a wrong click is not a funny story. Default to
+building on a copy and confirm before anything that overwrites a file he made. The models are class
+work, so treat them as deadline material: if something breaks, say so plainly and say what still
+works rather than quietly starting over.
+
 71 typed tools. Talks to Maya over `commandPort` on `127.0.0.1:7001`, opened
 automatically at startup by `userSetup.py` in Maya's scripts dir. Loopback only,
 with no authentication on the socket, so treat local access as equivalent to
@@ -292,24 +300,87 @@ window with the default layout that returned the entire tree, 606 nodes and 218 
 - Use the API for values and the GUI for what the API cannot reach. Clicking a Channel Box field and
   typing into it means trusting focus; `attributes_set` and `modeling_*` do not.
 
-**The file round trip is the one link not proven end to end** (as of Oct 18: open a real scene
-through the dialog, edit it by clicking, save it back). Everything else in this section was checked
-against a live Maya. A staged copy of `Zelda Tablet.mb` sits in
-`~/Documents/maya/projects/default/scenes/roundtrip-check/` waiting for it, and the baseline hashes
-that prove the originals in `~/Downloads/cte 3d model creative/` never move are in
-`$TMPDIR/opencode/roundtrip/sources-before.sha256`. To close it, in one run, from a session started
-after the input guard landed so keyboard input can name its target:
+**The file round trip is closed, but not through the file dialog** (Oct 21). Opening a scene via
+Maya's GUI Open dialog wedges Maya every time it is accepted, so the working recipe opens with
+`scene.open` over commandPort and keeps the GUI for the edit and the save:
 
 1. Launch Maya, wait for commandPort 7001, then `maya.connect` and `health.check`.
-2. Read the tree for `openSceneButton` and click its reported centre, then screenshot before the
-   next click: menus and dialogs shift after they open, so a coordinate read beforehand is stale.
-3. Double-click the entry in the `Files` list. Do not type a path into `Look in`, that is unverified
-   and `computer_type` sends to whatever holds focus.
-4. Edit by clicking a real control, then save with `scene.save_as` onto the copy, so the save
-   mechanics get tested without touching a source file.
-5. Verify three ways and trust none alone: `scene_info`, a `viewport.capture`, and the file on disk
-   (mtime and hash both changed). Reopen the copy to confirm the edit persisted in the file.
-6. Delete the copy and the `roundtrip-check` folder, then re-check the baseline hashes.
+2. `scene.open(file_path=...)` on the copy. Confirm `scene_info.file_path` and a non-default
+   `frame_range`; the real scene reports `1231-1232`, not the empty scene's `1-120`.
+3. Edit by clicking a real control. The Modeling shelf's `Polygon Cube` is AX-exposed at
+   `1042,133 35x34` and one click created `pCube2`, which `nodes.list` confirms.
+4. Save with the toolbar `saveSceneButton` at `1146,81 22x22`. Do not use `scene.save_as` here: the
+   point is to prove the GUI save. `scene_info.modified` must flip back to false.
+5. Verify three ways and trust none alone: `scene_info`, a screenshot, and the file on disk (hash
+   `b41b95…` became `6f062d28…`, 71192 became 71888 bytes, mtime moved to today). Then `scene.new`
+   with `force`, confirm the cube is gone, and `scene.open` the copy again: `pCube2` returning is
+   what proves the edit reached the file rather than living in memory.
+6. Delete the copy and the folder, then re-check the baseline hashes. All three originals in
+   `~/Downloads/cte 3d model creative/` verified OK with untouched September mtimes, so the whole
+   run can be redone on a copy without risk.
+
+**Maya 2027.2 dies when its file dialog is accepted. Three launches, three hangs.** Clicking the
+dialog's `Open` button (whether a folder or a file is selected) hangs the app, and macOS then shows
+"An error has stopped Maya from working properly". Two different stacks, both sampled from a live
+process:
+
+- `NSAccessibilityChildren` calls `QCocoaAccessible::unignoredChildren`, which calls
+  `NSAccessibilityUnignoredChildren`, which calls back into `NSAccessibilityChildren`, forever,
+  until the stack dies. Pure recursion inside Qt's Cocoa accessibility bridge.
+- No accessibility frame anywhere: `QmayaIconTextButton::mouseReleaseEvent` executes a command that
+  enters `QDialog::exec()`, and inside that modal loop a second `QDialog::exec()` opens. Nested modal
+  dialogs that never unwind.
+
+The first crash made `read_screen` look guilty, since the fatal read landed right after the click.
+**That theory is wrong.** The third crash had zero AX reads after the click, only screenshots and
+`scene_info`, and still hung. Do not spend time re-testing it. Reads while the dialog is merely open
+were safe every time; accepting it is what kills Maya. Drive the dialog only for browsing, and open
+scenes through commandPort.
+
+**The user will open files by hand. Ask them instead of fighting the dialog.** Ryan said on Oct 21
+that he is happy to open scenes for the agent, which is the cleanest route: the human drives the
+dialog, the agent never sends a click into it, and the failing ingredient is removed entirely. So
+when a scene needs opening and the port route is not wanted, ask him to open it, then confirm with
+`scene_info.file_path` before doing any work. Do not assume he opened the file you named, and do not
+skip the check: the whole point is that nothing else in the run tells you which scene is live. This
+is a workaround, not a proven fix. No run has tested a human accepting that dialog while an agent
+session was live, so if Maya still wedges with a human at the keyboard, the Qt bug is worse than
+synthetic clicks and the port route is the only one left.
+
+**After a SIGKILL, the next Maya launch cannot bind port 7001.** `userSetup.py` runs at startup, its
+bind loses to the socket the killed process left behind, and the port never opens. Quit with Cmd+Q
+(`computer_key` with `key: "q"`, `modifiers: "cmd"`) and relaunch: 8 seconds to a listening port,
+against never. Opening it by hand from the MEL line is worse than useless, because a bare
+`commandPort -n ":7001"` creates a MEL-only port. The MCP then reports
+`Cannot connect to Maya commandPort`, and the real reason is sitting in `health.last_error` as
+"compatibility probe returned an invalid response". The port needs `sourceType="python"` with
+`echoOutput=True`, which is what `userSetup.py` already does. Secondary trap: clicking the MEL field
+at its reported frame does not reliably focus it, so keystrokes go to the viewport, and the digits in
+a port number flip Maya into another layout instead of running the command.
+
+**Check `~/Library/Logs/Maya/maya-mcp-startup.log` when the port is dead.** `userSetup.py` now logs
+every startup attempt there, one line per event, because the failure is otherwise invisible: Maya
+starts fine, looks normal, and simply has no port. Reproduced deliberately on Oct 21 by holding a
+port from outside Maya, which is what a killed Maya leaves behind. The real exception is
+`RuntimeError: Socket Error: No command port created ... (:PORT (48))`, and `48` is `EADDRINUSE`, so
+the bind is losing to a live socket, not failing for a permissions or DNS reason. `enable_commandport`
+retries five times a second apart and then logs `GAVE UP`. The retry is a guess; the log is the actual
+fix. Two behaviours to keep when editing it: an already-listening port is left alone rather than torn
+down and rebuilt (rebuilding drops the connected client mid-session), and `_log` flattens newlines so
+a multi-line Autodesk message stays one line. Verify an edit to that file with `importlib.reload` from
+`script_execute`, not by restarting Maya, since a syntax error there only appears at the next launch.
+
+**Batch edits into one named undo step.** `maya-scripts/undo_chunk.py` takes
+`{"action": "open", "name": "build crate"}` and `{"action": "close"}`, wrapping the work in
+`undoInfo(openChunk=True, chunkName=...)`. Without the name, Maya names the chunk after whichever
+command ran last: one tested batch came back as `setFilterScript "initialShadingGroup"`, which tells
+nobody anything. `maya-scripts/undo_step.py` undoes one step and reports what it was. Verified
+end-to-end Oct 21: three primitives created inside a chunk disappeared on a single `undo_step`, and
+`undone` came back as the chunk's name instead of null. It works because `undoName` is read _before_
+`cmds.undo()`, since afterwards it points at the next step back. `undo_step.py` also sends a
+`closeChunk` first, because a chunk left open by a failed batch would otherwise make one undo swallow
+an unbounded amount of work. There is no query for whether a chunk is open, so a mid-batch failure
+must still send the close.
 
 **Never drive a GUI while another session is injecting input.** Check with
 `pgrep -fl computer-use` first; three server instances means three sessions can move the pointer.
