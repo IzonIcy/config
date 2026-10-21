@@ -401,11 +401,16 @@ the persp panel focused and the outliner beside it.
 `pane_layout.py` (verify layout without pixels), `port_bind_test.py` (reproduce the bind failure by
 holding a port, then reloading `userSetup`). All live in `~/.config/opencode/maya-scripts/`.
 
-**Start a session with `~/.config/opencode/bin/maya-status.sh`.** It checks the app process, the
-listening port, and whether that port answers a Python probe, then prints the last startup log lines
-and the newest scene file, ending in `READY` or `NOT READY` with the next step (exit code 0 or 1).
-That is the fast honest answer, because `health_check` alone reports `offline` on a first call and the
-MCP's connection error conflates "nothing listening" with "listening but MEL-only". Then
+**Start a session with `~/.config/opencode/bin/maya-status.sh`.** It checks the app process and the
+listening port, reports whether a client is connected (or probes the Python port when none is), then
+prints the last startup log lines and the newest scene file, ending in `READY` or `NOT READY` with the
+next step (exit code 0 or 1). That is the fast honest answer, because `health_check` alone reports
+`offline` on a first call and the MCP's connection error conflates "nothing listening" with
+"listening but MEL-only". Do not make the probe decisive: Maya's commandPort serves one client at a
+time, so while maya-mcp is connected a second probe gets silence, and an earlier version of this
+script answered NOT READY on a working session because of exactly that. Check for an ESTABLISHED
+connection first, which is proof, and only fall back to the probe when nothing is connected. Both
+branches verified Oct 21, including `MAYA_MCP_PORT=7999` for the not-listening path. Then
 `scene_open` the file the user wants, run `scene_audit.py` to see what is actually in it, and start
 the work inside `undo_chunk.py`. Verified on a real cold start Oct 21: quit, wait for the port to be
 bindable, launch, port listening in 10 seconds, preflight `READY`, scene reopened with all meshes and
