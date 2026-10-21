@@ -401,6 +401,25 @@ the persp panel focused and the outliner beside it.
 `pane_layout.py` (verify layout without pixels), `port_bind_test.py` (reproduce the bind failure by
 holding a port, then reloading `userSetup`). All live in `~/.config/opencode/maya-scripts/`.
 
+**Start a session with `~/.config/opencode/bin/maya-status.sh`.** It checks the app process, the
+listening port, and whether that port answers a Python probe, then prints the last startup log lines
+and the newest scene file, ending in `READY` or `NOT READY` with the next step (exit code 0 or 1).
+That is the fast honest answer, because `health_check` alone reports `offline` on a first call and the
+MCP's connection error conflates "nothing listening" with "listening but MEL-only". Then
+`scene_open` the file the user wants, run `scene_audit.py` to see what is actually in it, and start
+the work inside `undo_chunk.py`. Verified on a real cold start Oct 21: quit, wait for the port to be
+bindable, launch, port listening in 10 seconds, preflight `READY`, scene reopened with all meshes and
+materials intact. Note `focus_persp_panel` usually logs "no persp panel yet, skipping focus" because
+it runs before the UI exists, and it does not matter: a fresh launch already lands focus on
+`modelPanel4`. Keep `userSetup.py` free of a deferred focus fix anyway, because any edit to that file
+costs a checksum dialog at the next launch.
+
+**Upstream bug reports live in `~/Documents/maya/GG_MayaMCP-issues.md`.** Four faults in `maya-mcp`
+0.6.1 (`maya_connect`'s misleading error, `scene_undo` returning `undone: null`, `nodes_delete`
+reporting a shape it deleted, `health_check` saying `offline` before the first command), each with a
+repro and a suggested patch. Written to be filed; not filed, because posting to a third-party repo is
+the user's call.
+
 **Check `~/Library/Logs/Maya/maya-mcp-startup.log` when the port is dead.** `userSetup.py` now logs
 every startup attempt there, one line per event, because the failure is otherwise invisible: Maya
 starts fine, looks normal, and simply has no port. Reproduced deliberately on Oct 21 by holding a
