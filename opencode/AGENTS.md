@@ -513,6 +513,36 @@ for geometry and `computer-use` for GUI work, as in the section above:
 `viewport.capture` to verify the result. When a capture and the API disagree,
 trust the API for existence and the capture for appearance, and investigate.
 
+### Which path: precision is scripting, never clicking
+
+Pick the route by what the operation touches, not by what looks easier. Clicking
+is for things a human would also click. Scripting is for anything with a number,
+an axis, or a component in it.
+
+- **Named control, click it.** Shelf button, toolbar button, panel tab, menu
+  item, dialog button. These have a title in the accessibility tree and the
+  result is visible on screen. Verified Oct 21: one click on the Modeling
+  shelf's `Polygon Cube` made a real `pCube1` (218v/216f), confirmed three ways
+  (`scene_info.modified` false to true, `scene_audit.py`, and a screenshot of it
+  selected in the outliner), and one `undo_step.py` removed it and reported
+  `undone: "CreatePolygonCube"`.
+- **Number, axis, or component, script it.** Vertex 47, an edge loop, a face
+  selection, `translateY = 1.25`, a 32 segment cylinder, a rotated joint. The
+  viewport reports no accessible elements, so a click lands on whatever Maya hit
+  tests under that pixel, and moving the camera invalidates the pixel anyway.
+  Use `modeling_*`, `attributes_set`, `nodes_*`, or a script in
+  `~/.config/opencode/maya-scripts/` through `script_execute`.
+- **Interactive drag, do not attempt it.** Sculpt brushes, the Move tool with
+  snapping, a slider mid-scrub. There is no accessible handle to grab, and a
+  drag needs a press, a move and a release with feedback you cannot read back.
+- **Precision inside a GUI-only dialog, script the values.** Open the panel by
+  clicking, set the numbers through the API or the dialog's text field, then
+  confirm with `scene_audit.py`. Do not nudge with arrow keys and hope.
+
+The test for whether a click is a reasonable idea: can you name the element, and
+could you tell from the scene data whether it worked? If either answer is no,
+write the script.
+
 ---
 
 # Universal Agent Guidelines
