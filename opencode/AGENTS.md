@@ -347,16 +347,59 @@ is a workaround, not a proven fix. No run has tested a human accepting that dial
 session was live, so if Maya still wedges with a human at the keyboard, the Qt bug is worse than
 synthetic clicks and the port route is the only one left.
 
-**After a SIGKILL, the next Maya launch cannot bind port 7001.** `userSetup.py` runs at startup, its
-bind loses to the socket the killed process left behind, and the port never opens. Quit with Cmd+Q
-(`computer_key` with `key: "q"`, `modifiers: "cmd"`) and relaunch: 8 seconds to a listening port,
-against never. Opening it by hand from the MEL line is worse than useless, because a bare
-`commandPort -n ":7001"` creates a MEL-only port. The MCP then reports
+**Maya cannot bind port 7001 while another Maya is still shutting down.** The bind fails with
+`RuntimeError: Socket Error: No command port created ... (:7001 (48))`, and `48` is `EADDRINUSE`. The
+port is genuinely busy: the outgoing process has not released it yet. Known on Oct 21 from a plain
+quit-then-relaunch, not only after a SIGKILL, so the earlier belief that Cmd+Q always clears it was
+wrong. What matters is ordering: confirm the old process is gone (`pgrep -f
+"Maya.app/Contents/MacOS/Maya"`) and that `:7001` is bindable before launching, otherwise the new
+Maya starts with no port. `userSetup.py` now retries that bind in the background for 120 seconds, so a
+race heals itself about two seconds after the port frees. The consequence for the agent: **poll the
+port for up to two minutes before concluding Maya is broken.** Verified on Oct 21 by holding 7001 from
+the shell, launching Maya, releasing the port six seconds later, and watching Maya log `commandPort
+OPEN ... after 2 background retries`. Opening it by hand from the MEL line is worse than useless,
+because a bare `commandPort -n ":7001"` creates a MEL-only port. The MCP then reports
 `Cannot connect to Maya commandPort`, and the real reason is sitting in `health.last_error` as
 "compatibility probe returned an invalid response". The port needs `sourceType="python"` with
 `echoOutput=True`, which is what `userSetup.py` already does. Secondary trap: clicking the MEL field
 at its reported frame does not reliably focus it, so keystrokes go to the viewport, and the digits in
 a port number flip Maya into another layout instead of running the command.
+
+**Editing `userSetup.py` makes Maya demand a checksum, and that dialog blocks quitting.** The next
+launch raises a modal titled "Secure UserSetup Checksum verification": "File .../userSetup.py has been
+modified since last check ... Do you want to save new checksum for this file?" with Yes/No. It blocks
+more than it looks: an `osascript -e 'quit app "Maya"'` returns `got an error: User canceled. (-128)`
+and Maya keeps running, so a quit that "failed" is usually this dialog. Answer Yes through the
+accessibility layer rather than coordinates, because the dialog can sit behind another app and a blind
+click hits whatever is on top:
+`peekaboo.inspect_ui({app_target: "Maya"})` returns a snapshot plus `elem_N - "Yes"`, then
+`peekaboo.action({on: "elem_N", action: "AXPress", snapshot: "<snapshot id>"})`. Expect "Action did
+not return an accepted outcome" even when it worked; confirm by re-reading the tree or by `Maya` no
+longer existing. Pressing Yes also lets an already-queued quit go through, which is why Maya can
+vanish mid-check. The approved hashes live in `prefs/userPrefs.mel` under `SafeModeUserSetupHash`;
+FNV-1a, FNV-1 and djb2 over the file bytes do not reproduce them, so do not try to pre-approve a
+checksum. Just answer the dialog once per edit.
+
+**`health_check` lies on the first call of a session.** It returns
+`{status: "offline", last_error: null, last_contact: null}` while Maya is up and every other tool
+works; one successful command and it reports `ok`. Do not diagnose a dead Maya from it alone. Either
+call `maya_connect` first or check `lsof -nP -iTCP:7001 -sTCP:LISTEN`.
+
+**Trust the scene data over the pixels.** `viewport_capture` returned byte-identical frames across
+different scene states on Oct 21 (116017 bytes every time, including after a scene reopened), and full
+desktop captures via `computer_screenshot` came back tiled with repeated title-bar text. Verify what
+is actually in the scene with `maya-scripts/scene_audit.py` instead: it reports each mesh, its vertex
+and face counts, its shader, the shader list, and any leftover probe nodes. `modelPanel` has no
+`visible` flag either (adding to the known-invalid `grid` and `shadingType`); query `control` and
+measure the control. To check the layout without a screenshot, `paneLayout("viewPanes",
+query=True, configuration=True)` returning `single` plus `getPanel(visiblePanels=True)` is the honest
+answer. On Oct 21 the captured frame looked quarter-tiled while the layout was confirmed single with
+the persp panel focused and the outliner beside it.
+
+**Scripts added for this workflow:** `scene_audit.py` (what is in the scene), `undo_chunk.py` /
+`undo_step.py` (one named undo step), `refresh_viewport.py` (single view plus redraw),
+`pane_layout.py` (verify layout without pixels), `port_bind_test.py` (reproduce the bind failure by
+holding a port, then reloading `userSetup`). All live in `~/.config/opencode/maya-scripts/`.
 
 **Check `~/Library/Logs/Maya/maya-mcp-startup.log` when the port is dead.** `userSetup.py` now logs
 every startup attempt there, one line per event, because the failure is otherwise invisible: Maya
@@ -364,11 +407,13 @@ starts fine, looks normal, and simply has no port. Reproduced deliberately on Oc
 port from outside Maya, which is what a killed Maya leaves behind. The real exception is
 `RuntimeError: Socket Error: No command port created ... (:PORT (48))`, and `48` is `EADDRINUSE`, so
 the bind is losing to a live socket, not failing for a permissions or DNS reason. `enable_commandport`
-retries five times a second apart and then logs `GAVE UP`. The retry is a guess; the log is the actual
-fix. Two behaviours to keep when editing it: an already-listening port is left alone rather than torn
-down and rebuilt (rebuilding drops the connected client mid-session), and `_log` flattens newlines so
-a multi-line Autodesk message stays one line. Verify an edit to that file with `importlib.reload` from
-`script_execute`, not by restarting Maya, since a syntax error there only appears at the next launch.
+makes three blocking attempts, then hands off to a Qt timer that retries every two seconds for 120
+seconds, logging once on success or on final failure. Two behaviours to keep when editing it: an
+already-listening port is left alone rather than torn down and rebuilt (rebuilding drops the connected
+client mid-session), and `_log` flattens newlines so a multi-line Autodesk message stays one line.
+Verify an edit to that file with `importlib.reload` from `script_execute`, not by restarting Maya,
+since a syntax error there only appears at the next launch. Remember the checksum dialog below when
+you do restart.
 
 **Batch edits into one named undo step.** `maya-scripts/undo_chunk.py` takes
 `{"action": "open", "name": "build crate"}` and `{"action": "close"}`, wrapping the work in
