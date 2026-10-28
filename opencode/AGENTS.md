@@ -617,43 +617,27 @@ Use the `memory` tool to persist stuff across sessions:
 
 ## Skills
 
-Skills are reusable workflow instructions stored as `SKILL.md` files under `~/.config/opencode/skills/<name>/`. Load them via your environment's skill mechanism if available; otherwise read the file directly and follow it. Don't wait to be told — when a situation in the routing table matches, act on it proactively.
+Skills live under `~/.config/opencode/skills/<name>/`. The install is the **pstack** skill stack (Lauren Tan's agent workflow, ported for OpenCode). Skills are symlinked from the clone at `~/.config/opencode/pstack-claude/plugins/pstack/skills/` — do not edit the symlinked files in place; edit the clone and `git pull` to update upstream.
 
-### Auto-trigger routing
+### Default workflow
 
-| Situation                                                       | Skill                                                                                                    |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| User asks for a non-trivial feature, refactor, or design change | **grill-with-docs** — interview BEFORE writing code; build the project's CONTEXT.md vocabulary as you go |
-| User floats an underbaked plan, idea, or decision (non-code)    | **grill-me**                                                                                             |
-| Alignment reached on spec-worthy work                           | **to-spec** to publish it, then offer **to-tickets**                                                     |
-| Executing a spec or tickets                                     | **implement** — drives tdd + code-review at pre-agreed seams                                             |
-| Building anything with testable behavior                        | **tdd** — red-green-refactor, failing test FIRST                                                         |
-| Bug resists the obvious fix, or repro is unclear                | **diagnosing-bugs** — feedback loop → minimise → hypothesise → fix → regression-test                     |
-| Meaningful changes done, about to commit                        | **code-review** before committing                                                                        |
-| User says "wait what", "huh?", or clearly didn't follow         | **wait-what** — re-pitch with the missing context, plain English                                         |
-| Long session wrapping up with work remaining                    | **handoff** — compact into a handoff doc for the next agent                                              |
-| User mentions shoehorn / `as` assertions in tests               | **migrate-to-shoehorn**                                                                                  |
-| User wants pre-commit hooks / Husky / lint-staged               | **setup-pre-commit**                                                                                     |
-| User wants exercise scaffolds (sections/problems/solutions)     | **scaffold-exercises**                                                                                   |
-| Writing docs, commit messages, PR descriptions                  | **unslop** — cut AI tells, add human voice                                                               |
+- Start non-trivial work with **poteto-mode**: "use poteto-mode to <goal>". It routes to the right playbook (plan, feature, refactor, bug, ship, investigation), delegates to subagents, and verifies before reporting done.
+- Bugs: for pstack, reproduction and evidence come via **poteto-mode**'s bug playbook; `correct` makes repeated mistakes hard to repeat.
+- Reviews: **thermos** (security + quality, both thermo-nuclear subagents) for branch/PR audits; **interrogate** for adversarial stress-testing of a change.
+- Planning: **architect** before code on anything non-trivial; **arena** when one attempt would lock in a bad shape; **swarm** for parallel coverage.
+- PRs: **make-pr-easy-to-review**, **get-pr-comments**, **babysit**, **fix-ci**, **fix-merge-conflicts**.
+- Writing: **unslop** replaces the human-voice rules below wherever a skill duplicates them; **technical-writing** for docs and RFCs.
 
-Composition with existing workflows: **testing-workflow** still governs test style and framework discovery; **tdd** governs the dev loop. **debugging-workflow** handles simple bugs; when it gets hard, **diagnosing-bugs** takes over.
+### pstack setup
 
-### Escalation offers (suggest it, don't auto-run it)
+- Run **setup-pstack** once to configure models per role.
+- **poteto-help** explains the stack; **what-did-i-get-done** summarizes commits.
+- Formal verification for concurrency/invariants: **create-formal-verification-skill**, maintained with **maintain-formal-verification-skill**; **statechart** renders TLA+ models.
 
-- Codebase feeling like a ball of mud, recurring design complaints → offer **improve-codebase-architecture**
-- Work too big for one session → offer **wayfinder** (requires tracker setup)
-- Issue backlog duty → offer **triage** (requires tracker setup)
+### Composition notes
 
-### Manual only — never auto-run
-
-- **setup-matt-pocock-skills** — one-time per-repo setup, ONLY on explicit request
-- **ask-matt**, **teach**, **to-questionnaire** — on request
-
-### Grilling guardrails
-
-- Skip grilling for trivial work: typo fixes, one-liners, direct questions, config tweaks.
-- Never grill the same topic twice in a session. Once we're aligned, build.
+- The memory MCP (see Tool Usage below) stays in use; prefer it plus project AGENTS.md files for persistence.
+- The skills personal files that were removed are gone; do not reference grill-me, to-spec, tdd, diagnosing-bugs, wait-what, handoff, or testing-workflow.
 
 ## Testing
 
