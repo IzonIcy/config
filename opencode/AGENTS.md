@@ -190,6 +190,16 @@ either as intended behaviour, not a fault.
   message had in fact navigated System Settings from General to Privacy &
   Security.
 
+### Browser (ego lite, chrome-devtools, playwright)
+
+Three browser paths exist here and they are not interchangeable.
+
+- The `ego-browser` skill comes first for anything that needs a real session. It drives the installed ego lite through its own TaskSpace API and shares the user's logins. Run `ego-browser skill` before a browser task.
+- The `chrome-devtools` MCP launches its own ego lite with an isolated profile at `~/.cache/chrome-devtools-mcp/chrome-profile`. Use it for CDP work, network inspection, traces, and performance. No shared logins.
+- The `playwright` MCP runs its own Chromium through `bin/playwright-mcp.sh`, which resolves the newest installed build at launch. No shared logins.
+
+Never point either MCP at `/Applications/ego lite.app/Contents/MacOS/ego lite` as a browser to launch. A second instance cannot register the ego mach service and dies with `bootstrap_check_in com.citrolabs.ego.lite.ego-browser: Permission denied (1100)`. A pinned `chromium-<build>` path has the same problem in slow motion: it breaks at the next Playwright upgrade.
+
 ### Maya (Autodesk Maya 2027)
 
 Maya work lives in the `maya` skill. Load it with the `skill` tool before touching Maya, modelling, or the viewport.
