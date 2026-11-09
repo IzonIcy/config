@@ -460,11 +460,9 @@
 				"type": "local",
 				"command": [
 					"bunx",
-					"@playwright/mcp",
-					"--executable-path",
-					"/Applications/Helium.app/Contents/MacOS/Helium"
+					"@playwright/mcp"
 				],
-				"disabled": false
+				"disabled": true
 			},
 			"memory": {
 				"type": "local",
@@ -540,7 +538,7 @@
 					"-y",
 					"chrome-devtools-mcp@1.10.1",
 					"--executablePath",
-					"/Applications/Helium.app/Contents/MacOS/Helium"
+					"/Applications/ego lite.app/Contents/MacOS/ego lite"
 				],
 				"disabled": false,
 				"environment": {}
