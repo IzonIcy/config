@@ -113,3 +113,8 @@ fpath=(~/.grok/completions/zsh $fpath)
 
 # GitHub MCP token (mode 600, separate so it isn't world-readable in .zshrc)
 [ -f "$HOME/.config/github-mcp-token" ] && source "$HOME/.config/github-mcp-token"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/ryanbahadori/.lmstudio/bin"
+# End of LM Studio CLI section
+

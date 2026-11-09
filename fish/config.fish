@@ -77,3 +77,8 @@ end
 
 # Added by Antigravity CLI installer
 set -gx PATH "/Users/ryanbahadori/.local/bin" $PATH
+
+# Added by LM Studio CLI (lms)
+set -gx PATH $PATH /Users/ryanbahadori/.lmstudio/bin
+# End of LM Studio CLI section
+
