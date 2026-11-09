@@ -1,49 +1,104 @@
-# Vesper Light Theme for btop
-# Light counterpart of the Rich Vesper theme, matches VesperLight terminal theme
+# Vesper Light theme for btop
+# Light counterpart of the Rich Vesper theme (zezic/rich-vesper palette)
 
-theme[main_bg]="#FFFFFF"
-theme[main_fg]="#121212"
+# Colors should be in 6 or 2 character hexadecimal or single spaced rgb decimal: "#RRGGBB", "#BW" or "0-255 0-255 0-255".
 
-theme[title]="#B8772A"
-theme[hi_fg]="#12803D"
-theme[selected_bg]="#E0E0E0"
-theme[selected_fg]="#121212"
+# Main background, empty for terminal default, needs to be empty for transparent background
+theme[main_bg]="#FAF9F4"
 
-theme[inactive_fg]="#5F5F5F"
-theme[inactive_bg]="#F0F0F0"
+# Main text color
+theme[main_fg]="#2A2825"
 
-theme[proc]="#C07A3E"
-theme[process]="#121212"
-theme[core]="#B8772A"
-theme[temp]="#B8433F"
+# Title color for boxes
+theme[title]="#96601E"
 
-theme[chart]="#B8772A"
-theme[graph]="#B8772A"
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#0F7A4A"
 
-theme[div_line]="#D0D0D0"
+# Background color of selected item in processes box
+theme[selected_bg]="#EAE6DC"
 
-# Memory colors
-theme[mem_used]="#B88A2E"
-theme[mem_cached]="#12803D"
-theme[mem_free]="#121212"
-theme[mem_available]="#3E8F5F"
+# Foreground color of selected item in processes box
+theme[selected_fg]="#141312"
 
-# Swap colors
-theme[swap_used]="#B8433F"
-theme[swap_free]="#121212"
+# Color of inactive/disabled text
+theme[inactive_fg]="#A8A29A"
 
-# Network colors
-theme[net_download]="#12803D"
-theme[net_upload]="#B8772A"
+# Color of text appearing on top of graphs, i.e uptime and current network graph scaling
+theme[graph_text]="#6B665E"
 
-# Process colors
-theme[process_cpu]="#B8772A"
-theme[process_mem]="#12803D"
+# Background color of the percentage meters
+theme[meter_bg]="#E3DED3"
 
-# GPU colors
-theme[gpu]="#6C5FA8"
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="#7A5AA8"
 
-# Battery colors
-theme[battery_high]="#12803D"
-theme[battery_medium]="#B88A2E"
-theme[battery_low]="#B8433F"
+# Cpu box outline color
+theme[cpu_box]="#B8772A"
+
+# Memory/disks box outline color
+theme[mem_box]="#12803D"
+
+# Net up/down box outline color
+theme[net_box]="#3D6FB4"
+
+# Processes box outline color
+theme[proc_box]="#7A5AA8"
+
+# Box divider line and small boxes line color
+theme[div_line]="#D7D1C5"
+
+# Temperature graph colors
+theme[temp_start]="#C89A2E"
+theme[temp_mid]="#D07B36"
+theme[temp_end]="#B8433F"
+
+# CPU graph colors
+theme[cpu_start]="#6A9A3F"
+theme[cpu_mid]="#C89A2E"
+theme[cpu_end]="#C05838"
+
+# Mem/Disk free meter
+theme[free_start]="#D7D1C5"
+theme[free_mid]="#B9C9A8"
+theme[free_end]="#6A9A3F"
+
+# Mem/Disk cached meter
+theme[cached_start]="#A8C4D8"
+theme[cached_mid]="#6F9BC7"
+theme[cached_end]="#3D6FB4"
+
+# Mem/Disk available meter
+theme[available_start]="#E3D3A8"
+theme[available_mid]="#C89A2E"
+theme[available_end]="#96601E"
+
+# Mem/Disk used meter
+theme[used_start]="#6A9A3F"
+theme[used_mid]="#C89A2E"
+theme[used_end]="#C05838"
+
+# Download graph colors
+theme[download_start]="#A8C4D8"
+theme[download_mid]="#6F9BC7"
+theme[download_end]="#3D6FB4"
+
+# Upload graph colors
+theme[upload_start]="#D8B0C8"
+theme[upload_mid]="#A97AB0"
+theme[upload_end]="#7A5AA8"
+
+# Process box color gradient for threads, mem and cpu usage
+theme[process_start]="#6A9A3F"
+theme[process_mid]="#C89A2E"
+theme[process_end]="#C05838"
+
+# Process box banner colors
+theme[proc_pause_bg]="#B8433F"
+theme[proc_follow_bg]="#3D6FB4"
+theme[proc_banner_bg]="#7A5AA8"
+theme[proc_banner_fg]="#FFFFFF"
+
+# Process following attributes
+theme[followed_bg]="#3D6FB4"
+theme[followed_fg]="#FFFFFF"
