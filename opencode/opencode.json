@@ -459,10 +459,7 @@
 			"playwright": {
 				"type": "local",
 				"command": [
-					"bunx",
-					"@playwright/mcp",
-					"--executable-path",
-					"/Users/ryanbahadori/Library/Caches/ms-playwright/chromium-1254/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+					"/Users/ryanbahadori/.config/opencode/bin/playwright-mcp.sh"
 				],
 				"disabled": false
 			},
