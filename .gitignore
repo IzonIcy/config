@@ -95,3 +95,9 @@ opencode-v1/
 # node id. Machine state, not dotfiles.
 remote-desktop-setup/
 opencode/pstack-claude/
+
+# Freebuff / manicode runtime state. credentials.json, the auth-secrets file,
+# sqlite databases and full chat logs all live in here, so a plain git add -A
+# would push them to the remote.
+manicode/
+freebuff-desktop/
