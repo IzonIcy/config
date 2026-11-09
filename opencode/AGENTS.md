@@ -48,6 +48,19 @@ whole MCP layer down at once.
 - Validate and inspect before calling it done: `python3 -m json.tool <file>`, then `git diff` in
   `~/.config` (dotfiles repo) to see exactly what moved.
 
+### Freebuff mirror
+
+Freebuff reads the same setup through `~/.agents`: `~/.AGENTS.md` is a symlink to this file, the
+skills in `~/.agents/skills` are symlinks into `~/.config/opencode/skills`, and `~/.agents/mcp.json`
+is a translated copy of the `mcp` block because the two tools use different schemas.
+
+- **After any edit to `opencode.json` or to a skill, run `python3 ~/.agents/sync-opencode.py`.** It
+  links new skills, regenerates `mcp.json` from the opencode config, and restores the `~/.AGENTS.md`
+  symlink if it went missing. Editing opencode without it leaves Freebuff on stale servers.
+- The script only writes under `~/.agents`. It never touches anything inside `~/.config/opencode`.
+- Run it with `--dry-run` first when you want to see what it would change. A no-op run reports
+  `0 added` and `mcp: N servers, unchanged`.
+
 ## Mac Control
 
 Three MCPs give this machine full desktop and Maya control. Use them; do not
