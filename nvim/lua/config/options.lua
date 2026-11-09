@@ -29,6 +29,7 @@ local options = {
 	foldexpr = "v:lua.vim.treesitter.foldexpr()",
 
 	termguicolors = true,
+	guifont = "Ioskeley Mono:h11",
 	background = "dark", --always dark mode, never light
 
 	ignorecase = true, --ignore case while searching

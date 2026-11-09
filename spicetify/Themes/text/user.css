@@ -9,7 +9,7 @@
 
 /* user settings */
 :root {
-  --font-family: "JetBrainsMonoNL NFM", monospace;
+  --font-family: "Ioskeley Mono", monospace;
   /*
     --font-family: 'Anonymous Pro', monospace;
     --font-family: 'Azeret Mono', monospace;
@@ -71,6 +71,7 @@
   font-size: var(--font-size) !important;
   font-weight: var(--font-weight) !important;
   line-height: var(--line-height) !important;
+  font-feature-settings: "calt" 1 !important;
 }
 .lyrics-lyrics-container *,
 .main-nowPlayingView-lyricsContent * {

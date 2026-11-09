@@ -1,0 +1,21 @@
+{
+    "buffer_font_family": "Ioskeley Mono",
+    "buffer_font_weight": 400,
+    "buffer_font_features": {
+        "calt": true
+    },
+    "ui_font_family": "Ioskeley Mono",
+    "ui_font_weight": 400,
+    "terminal": {
+        "font_family": "Ioskeley Mono",
+        "font_weight": 400,
+        "font_features": {
+            "calt": true
+        }
+    },
+    "theme": {
+        "mode": "dark",
+        "light": "One Light",
+        "dark": "One Dark"
+    }
+}
