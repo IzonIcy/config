@@ -544,6 +544,11 @@
 				],
 				"disabled": false,
 				"environment": {}
+			},
+			"exa": {
+				"type": "remote",
+				"url": "https://mcp.exa.ai/mcp",
+				"disabled": false
 			}
 		}
 	},
